@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+.turbo
+dist
+build
+out
+coverage
+
+# Expo
+.expo
+.expo-shared
+
+# Misc
+.DS_Store
+*.log
+
+# Config files that should keep their formatting
+pnpm-lock.yaml
+package-lock.json
