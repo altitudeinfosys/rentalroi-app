@@ -1,5 +1,11 @@
-// Supabase client and queries will be exported here
-// Example: export { supabase } from './client';
-// Example: export * from './queries';
+// Export Supabase client
+export { supabase, createSupabaseClient } from './client';
 
-export const placeholder = 'Database package initialized';
+// Export types
+export type { Database, SubscriptionTier, PropertyType } from './types';
+
+// Export auth helpers
+export * from './auth';
+
+// Export all queries
+export * from './queries';
