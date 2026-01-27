@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 import { CalculationInputs } from '@repo/calculations';
 import {
   calculateMonthlyPayment,
@@ -18,6 +19,11 @@ import {
 import { MetricsCard, MetricsGrid } from './metrics-card';
 import { ResultsChart, CHART_COLORS, formatPercentage } from './results-chart';
 import { ResultsTable } from './results-table';
+import { SaveCalculationButton } from './save-calculation-button';
+import { ToastContainer } from '@/components/ui/toast';
+import { useToast } from '@/lib/hooks/use-toast';
+import type { CalculatorFormData } from '@/lib/validation/calculator-schema';
+import type { ComputedResults } from '@/lib/mappers/calculation-mapper';
 
 type TabId = 'first-year' | 'multi-year' | 'metrics' | 'assumptions' | 'amortization';
 
@@ -43,6 +49,9 @@ const TABS: Tab[] = [
 export function Step5Results() {
   const [activeTab, setActiveTab] = useState<TabId>('first-year');
   const { watch } = useFormContext<CalculationInputs>();
+  const searchParams = useSearchParams();
+  const calculationId = searchParams.get('id');
+  const { toasts, removeToast, success, error } = useToast();
 
   // Get all form values
   const values = watch();
@@ -144,17 +153,75 @@ export function Step5Results() {
     };
   }, [values]);
 
+  // Prepare computed results for saving
+  const computedResults: ComputedResults = useMemo(() => ({
+    totalInvestment: results.totalInvestment,
+    monthlyMortgagePayment: results.monthlyPayment,
+    monthlyGrossIncome: results.cashFlow.grossIncome,
+    monthlyExpenses: results.monthlyOperatingExpenses,
+    monthlyCashFlow: results.cashFlow.cashFlow,
+    annualCashFlow: results.cashFlow.cashFlow * 12,
+    cashOnCashReturn: results.metrics.cashOnCashReturn,
+    capRate: results.metrics.capRate,
+  }), [results]);
+
+  // Map CalculationInputs to CalculatorFormData for saving
+  const formDataForSave: CalculatorFormData = useMemo(() => ({
+    propertyType: values.propertyType || 'single_family',
+    title: values.title || 'Untitled Property',
+    address: values.address,
+    city: values.city,
+    state: values.state,
+    zipCode: values.zipCode,
+    bedrooms: values.bedrooms,
+    bathrooms: values.bathrooms,
+    squareFeet: values.squareFeet,
+    purchasePrice: values.purchasePrice,
+    downPaymentPercent: values.downPaymentPercent,
+    closingCosts: values.closingCosts,
+    repairCosts: values.repairCosts,
+    interestRate: values.interestRate,
+    loanTermYears: values.loanTermYears,
+    monthlyRent: values.monthlyRent,
+    otherMonthlyIncome: values.otherMonthlyIncome,
+    vacancyRate: values.vacancyRate,
+    annualRentIncrease: values.annualRentIncrease,
+    propertyTaxAnnual: values.propertyTaxAnnual,
+    insuranceAnnual: values.insuranceAnnual,
+    hoaMonthly: values.hoaMonthly,
+    maintenanceMonthly: values.maintenanceMonthly,
+    propertyManagementPercent: values.propertyManagementPercent,
+    utilitiesMonthly: values.utilitiesMonthly,
+    otherExpensesMonthly: values.otherExpensesMonthly,
+    annualExpenseIncrease: values.annualExpenseIncrease,
+    holdingLength: values.holdingLength,
+    annualAppreciationRate: values.annualAppreciationRate,
+    saleClosingCostsPercent: values.saleClosingCostsPercent,
+  }), [values]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Investment Analysis
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Complete analysis and {values.holdingLength}-year projection
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Investment Analysis
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Complete analysis and {values.holdingLength}-year projection
+          </p>
+        </div>
+        <SaveCalculationButton
+          formData={formDataForSave}
+          results={computedResults}
+          calculationId={calculationId}
+          onSuccess={() => success('Calculation saved!', 'Your analysis has been saved to your account.')}
+          onError={(err) => error('Failed to save', err)}
+        />
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700">

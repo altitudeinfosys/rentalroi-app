@@ -2,11 +2,14 @@
 
 /**
  * Calculator Wizard - Main Page Component
+ * Supports both new calculations and editing existing ones via ?id= query param
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { DEFAULT_VALUES } from '@repo/calculations';
 import { calculatorSchema, getStepFields, type CalculatorFormData } from '@/lib/validation/calculator-schema';
 import { Step1PropertyDetails } from '@/components/calculator/step1-property-details';
@@ -15,7 +18,8 @@ import { Step3Income } from '@/components/calculator/step3-income';
 import { Step4Expenses } from '@/components/calculator/step4-expenses';
 import { Step5Results } from '@/components/calculator/step5-results';
 import { ProgressPreview } from '@/components/calculator/progress-preview';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { createClient } from '@/lib/supabase/client';
+import { getCalculation } from '@/lib/supabase/calculations';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -27,9 +31,14 @@ const STEP_TITLES = {
   5: 'Results',
 };
 
-export default function CalculatorPage() {
+function CalculatorContent() {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('id');
+
   const [currentStep, setCurrentStep] = React.useState<Step>(1);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(!!editId);
+  const [editTitle, setEditTitle] = React.useState<string | null>(null);
 
   // Initialize form with default values
   const form = useForm<CalculatorFormData>({
@@ -42,21 +51,61 @@ export default function CalculatorPage() {
     mode: 'onBlur',
   });
 
-  // Load draft from localStorage on mount
+  // Load existing calculation if editing
   React.useEffect(() => {
-    const draftStr = localStorage.getItem('calculator_draft');
-    if (draftStr) {
-      try {
-        const draft = JSON.parse(draftStr);
-        form.reset(draft);
-      } catch (error) {
-        console.error('Failed to load draft:', error);
+    if (!editId) {
+      // Not editing - try to load from localStorage
+      const draftStr = localStorage.getItem('calculator_draft');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          form.reset(draft);
+        } catch (error) {
+          console.error('Failed to load draft:', error);
+        }
       }
+      return;
     }
-  }, [form]);
 
-  // Debounced auto-save to localStorage
+    // Load calculation from database
+    const loadCalculation = async () => {
+      setIsLoading(true);
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          console.error('Not authenticated');
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await getCalculation(editId, user.id);
+
+        if ('error' in result || !result.formData) {
+          console.error('Failed to load calculation:', result.error);
+          setIsLoading(false);
+          return;
+        }
+
+        // Pre-fill form with saved values
+        form.reset(result.formData);
+        setEditTitle(result.formData.title);
+      } catch (error) {
+        console.error('Failed to load calculation:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCalculation();
+  }, [editId, form]);
+
+  // Debounced auto-save to localStorage (only for new calculations)
   React.useEffect(() => {
+    // Don't auto-save to localStorage if editing existing calculation
+    if (editId) return;
+
     const subscription = form.watch((values) => {
       const timeoutId = setTimeout(() => {
         try {
@@ -70,7 +119,7 @@ export default function CalculatorPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, editId]);
 
   const handleNext = async () => {
     // Validate current step fields
@@ -100,7 +149,6 @@ export default function CalculatorPage() {
     setIsSaving(true);
     try {
       // For now, just save to localStorage
-      // In future phases, this will save to database if authenticated
       const values = form.getValues();
       localStorage.setItem('calculator_draft', JSON.stringify(values));
       alert('Calculation saved locally!');
@@ -130,6 +178,19 @@ export default function CalculatorPage() {
     }
   };
 
+  const handleStartNew = () => {
+    // Clear the form and start fresh
+    form.reset({
+      propertyType: 'single_family',
+      title: '',
+      ...DEFAULT_VALUES,
+    } as any);
+    setEditTitle(null);
+    setCurrentStep(1);
+    // Update URL to remove id param
+    window.history.replaceState({}, '', '/calculator');
+  };
+
   // Check if all required fields are filled
   const canViewResults = React.useMemo(() => {
     const values = form.watch();
@@ -149,16 +210,43 @@ export default function CalculatorPage() {
     );
   }, [form.watch()]);
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading calculation...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Calculator
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {editId ? 'Edit Calculation' : 'Calculator'}
+              </h1>
+              {editTitle && (
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Editing: {editTitle}
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-3">
+              {editId && (
+                <button
+                  onClick={handleStartNew}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  Start New
+                </button>
+              )}
               {currentStep < 5 && canViewResults && (
                 <button
                   onClick={handleViewResults}
@@ -167,14 +255,15 @@ export default function CalculatorPage() {
                   View Results
                 </button>
               )}
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
-              >
-                {isSaving ? 'Saving...' : 'Save Draft'}
-              </button>
-              <ThemeToggle />
+              {!editId && (
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : 'Save Draft'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -296,5 +385,20 @@ export default function CalculatorPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CalculatorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading calculator...</p>
+        </div>
+      </div>
+    }>
+      <CalculatorContent />
+    </Suspense>
   );
 }
