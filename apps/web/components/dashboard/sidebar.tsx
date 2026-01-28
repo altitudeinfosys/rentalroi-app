@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Calculator, History, Settings, X } from 'lucide-react'
+import { Home, Calculator, History, Settings, X, PlusCircle } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -14,11 +14,6 @@ const navItems = [
     label: 'Overview',
     href: '/',
     icon: Home,
-  },
-  {
-    label: 'New Calculation',
-    href: '/calculator?new=true',
-    icon: Calculator,
   },
   {
     label: 'My Calculations',
@@ -34,6 +29,20 @@ const navItems = [
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleNewCalculation = () => {
+    // Clear localStorage draft
+    localStorage.removeItem('calculator_draft')
+    onClose()
+
+    // If already on calculator page, force reload
+    if (pathname === '/calculator' || pathname?.startsWith('/calculator')) {
+      window.location.href = '/calculator'
+    } else {
+      router.push('/calculator')
+    }
+  }
 
   return (
     <>
@@ -100,6 +109,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </Link>
             )
           })}
+
+          {/* New Calculation - special handling to clear form */}
+          <button
+            onClick={handleNewCalculation}
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg
+              text-sm font-medium transition-colors
+              ${
+                pathname === '/calculator'
+                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }
+            `}
+          >
+            <PlusCircle className="w-5 h-5" />
+            New Calculation
+          </button>
         </nav>
 
         {/* Upgrade banner (for free users) */}
