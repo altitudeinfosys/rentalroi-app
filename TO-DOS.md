@@ -1,9 +1,43 @@
 # TO-DOS
 
-## Implement Light and Dark Mode - 2026-01-26 12:13
+## Completed ✅
 
-- **Add light and dark mode support for web app and future mobile** - Implement comprehensive theming system with light/dark mode toggle. **Problem:** Calculator currently lacks dark mode support, which is needed for better user experience and will be required for mobile apps. The plan includes dark mode for Phase 2.7 and mobile apps use NativeWind which requires dark mode configuration. **Files:** `apps/web/app/layout.tsx` (root layout for theme provider), `apps/web/components/calculator/step5-results.tsx:1-428` (all tabs use dark mode classes but theme switching not implemented), `tailwind.config.js` (dark mode configuration), `apps/mobile/app/_layout.tsx` (future mobile implementation). **Solution:** Add next-themes provider to web app layout, implement theme toggle component in header, verify all components support dark mode classes (already implemented throughout calculator components), test on mobile viewport, document dark mode usage for mobile app implementation.
+### Phase 2 - Calculator Wizard
+- ~~Implement Light and Dark Mode~~ - **DONE** (2026-01-26) - Added next-themes, ThemeProvider, ThemeToggle
+- ~~Add Zip Code Field to Property Details~~ - **DONE** (2026-01-26) - Added to Step 1 form
 
-## Add Zip Code Field to Property Details - 2026-01-26 12:14
+### Phase 3 - Authentication & Saved Calculations
+- ~~Install Supabase SDK~~ - **DONE** (2026-01-26) - Added @supabase/supabase-js, @supabase/ssr
+- ~~Create Supabase client utilities~~ - **DONE** - lib/supabase/client.ts, server.ts, middleware.ts
+- ~~Add auth middleware for protected routes~~ - **DONE** - middleware.ts with route protection
+- ~~Add login/signup pages~~ - **DONE** - (auth)/login, signup, forgot-password
+- ~~Configure Supabase Auth~~ - **DONE** - OAuth callback route, session refresh
+- ~~Implement saveCalculation() API~~ - **DONE** - lib/supabase/calculations.ts
+- ~~Implement getCalculations() API~~ - **DONE**
+- ~~Implement getCalculation(id) API~~ - **DONE**
+- ~~Implement deleteCalculation(id) API~~ - **DONE**
+- ~~Add "Save" button to Step 5 results~~ - **DONE** - SaveCalculationButton component
+- ~~Create calculations history page~~ - **DONE** - /calculations with cards
+- ~~Load saved calculation into wizard (edit flow)~~ - **DONE** - ?id= query param support
+- ~~Apply migrations to DEV and PROD~~ - **DONE** (2026-01-26) - All columns verified
 
-- **Add zip code input field to Step 1 Property Details form** - Add zip code field for property location. **Problem:** Property address is captured but zip code is missing, which is needed for future features like market data lookup, property tax estimates, and geographic analysis. The database schema includes an address field but no dedicated zip code field. **Files:** `apps/web/components/calculator/step1-property-details.tsx` (add zip code input), `packages/database/src/types.ts` (may need to add zipCode field to calculations table), `packages/calculations/src/types.ts:CalculationInputs` (add zipCode field), `apps/web/lib/validation/calculator-schema.ts` (add zip code validation). **Solution:** Add zipCode field to CalculationInputs type, add validation (5-digit or 5+4 format), add InputField component to Step 1 after address field, ensure it's saved in localStorage and included in calculations table when saving to Supabase.
+---
+
+## Pending
+
+### Phase 3 - Remaining Items
+- [ ] Generate shareable links (share calculation with others)
+- [ ] Create shared view page (`/shared/[id]`)
+- [ ] Configure OAuth providers in Supabase Dashboard (Google, Apple)
+
+### Testing
+- [ ] Run full test suite for calculation engine
+- [ ] Add integration tests for Supabase operations
+- [ ] Test auth flow end-to-end
+
+### Phase 4 - Polish & Production
+- [ ] Error handling improvements
+- [ ] Loading states and skeletons
+- [ ] Mobile responsiveness audit
+- [ ] Performance optimization
+- [ ] Production deployment setup

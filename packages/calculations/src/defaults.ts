@@ -23,7 +23,15 @@ export const DEFAULT_VALUES: Partial<CalculationInputs> = {
   // Expenses
   hoaMonthly: 0,
   maintenanceMonthly: 0,
+  maintenancePercent: 1, // 1% of property value annually (rule of thumb)
+  maintenanceMode: 'dollar',
   propertyManagementPercent: 0, // User can enable if needed
+  propertyManagementMonthly: 0,
+  propertyManagementMode: 'percent',
+  propertyTaxPercent: 1.2, // Typical property tax rate
+  propertyTaxMode: 'dollar',
+  insurancePercent: 0.5, // Typical insurance rate
+  insuranceMode: 'dollar',
   utilitiesMonthly: 0,
   otherExpensesMonthly: 0,
   annualExpenseIncrease: 2.5,

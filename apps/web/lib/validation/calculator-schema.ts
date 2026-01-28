@@ -83,29 +83,68 @@ export const step3Schema = z.object({
 });
 
 /**
+ * Expense input mode type
+ */
+export const expenseModes = ['dollar', 'percent'] as const;
+export type ExpenseMode = typeof expenseModes[number];
+
+/**
  * Step 4: Expenses Schema
  */
 export const step4Schema = z.object({
+  // Property Tax - with toggle
   propertyTaxAnnual: z
     .number()
     .min(0, 'Property tax cannot be negative')
     .max(10000000, 'Property tax is too high'),
+  propertyTaxPercent: z
+    .number()
+    .min(0, 'Property tax % cannot be negative')
+    .max(10, 'Property tax % is too high')
+    .optional(),
+  propertyTaxMode: z.enum(expenseModes).optional(),
+
+  // Insurance - with toggle
   insuranceAnnual: z
     .number()
     .min(0, 'Insurance cannot be negative')
     .max(1000000, 'Insurance is too high'),
-  hoaMonthly: z
+  insurancePercent: z
     .number()
-    .min(0, 'HOA fees cannot be negative')
-    .max(100000, 'HOA fees are too high'),
+    .min(0, 'Insurance % cannot be negative')
+    .max(5, 'Insurance % is too high')
+    .optional(),
+  insuranceMode: z.enum(expenseModes).optional(),
+
+  // Maintenance - with toggle
   maintenanceMonthly: z
     .number()
     .min(0, 'Maintenance cannot be negative')
     .max(100000, 'Maintenance is too high'),
+  maintenancePercent: z
+    .number()
+    .min(0, 'Maintenance % cannot be negative')
+    .max(5, 'Maintenance % is too high')
+    .optional(),
+  maintenanceMode: z.enum(expenseModes).optional(),
+
+  // Property Management - with toggle (reverse: default is %)
   propertyManagementPercent: z
     .number()
     .min(0, 'Management fee cannot be negative')
     .max(50, 'Management fee cannot exceed 50%'),
+  propertyManagementMonthly: z
+    .number()
+    .min(0, 'Management fee cannot be negative')
+    .max(100000, 'Management fee is too high')
+    .optional(),
+  propertyManagementMode: z.enum(expenseModes).optional(),
+
+  // Fixed expenses (no toggle needed)
+  hoaMonthly: z
+    .number()
+    .min(0, 'HOA fees cannot be negative')
+    .max(100000, 'HOA fees are too high'),
   utilitiesMonthly: z
     .number()
     .min(0, 'Utilities cannot be negative')
@@ -114,6 +153,8 @@ export const step4Schema = z.object({
     .number()
     .min(0, 'Other expenses cannot be negative')
     .max(100000, 'Other expenses are too high'),
+
+  // Multi-year assumptions
   annualExpenseIncrease: z
     .number()
     .min(0, 'Expense increase cannot be negative')

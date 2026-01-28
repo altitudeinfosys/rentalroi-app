@@ -7,6 +7,7 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InputField } from './input-field';
+import { ExpenseToggleField } from './expense-toggle-field';
 import { calculateMonthlyPayment, calculateCashFlow } from '@repo/calculations';
 import { getValidationWarnings } from '@/lib/validation/calculator-schema';
 
@@ -26,6 +27,8 @@ export function Step4Expenses() {
   const hoaMonthly = watch('hoaMonthly');
   const maintenanceMonthly = watch('maintenanceMonthly');
   const propertyManagementPercent = watch('propertyManagementPercent');
+  const propertyManagementMonthly = watch('propertyManagementMonthly');
+  const propertyManagementMode = watch('propertyManagementMode');
   const utilitiesMonthly = watch('utilitiesMonthly');
   const otherExpensesMonthly = watch('otherExpensesMonthly');
   const closingCosts = watch('closingCosts');
@@ -50,9 +53,13 @@ export function Step4Expenses() {
   const propertyTaxMonthly = (propertyTaxAnnual || 0) / 12;
   const insuranceMonthly = (insuranceAnnual || 0) / 12;
   const grossMonthlyIncome = (monthlyRent || 0) + (otherMonthlyIncome || 0);
-  const managementFee = propertyManagementPercent
-    ? (grossMonthlyIncome * propertyManagementPercent) / 100
-    : 0;
+
+  // Management fee: use dollar value if in dollar mode, otherwise calculate from percent
+  const managementFee = propertyManagementMode === 'dollar'
+    ? (propertyManagementMonthly || 0)
+    : propertyManagementPercent
+      ? (grossMonthlyIncome * propertyManagementPercent) / 100
+      : 0;
 
   const monthlyExpenses =
     propertyTaxMonthly +
@@ -96,24 +103,36 @@ export function Step4Expenses() {
             Annual Expenses
           </h3>
 
-          <InputField
-            name="propertyTaxAnnual"
+          <ExpenseToggleField
+            dollarFieldName="propertyTaxAnnual"
+            percentFieldName="propertyTaxPercent"
+            modeFieldName="propertyTaxMode"
             label="Property Tax (Annual)"
-            type="currency"
             required
-            placeholder="4800"
-            helpText="Annual property tax amount"
-            min={0}
+            percentBaseValue={purchasePrice || 0}
+            percentBaseLabel="of purchase price"
+            dollarPlaceholder="4800"
+            percentPlaceholder="1.2"
+            dollarHelpText="Annual property tax amount"
+            percentHelpText="Typically 0.5% - 2.5% of property value"
+            isDollarAnnual={true}
+            maxPercent={10}
           />
 
-          <InputField
-            name="insuranceAnnual"
+          <ExpenseToggleField
+            dollarFieldName="insuranceAnnual"
+            percentFieldName="insurancePercent"
+            modeFieldName="insuranceMode"
             label="Insurance (Annual)"
-            type="currency"
             required
-            placeholder="1200"
-            helpText="Annual property insurance premium"
-            min={0}
+            percentBaseValue={purchasePrice || 0}
+            percentBaseLabel="of purchase price"
+            dollarPlaceholder="1200"
+            percentPlaceholder="0.5"
+            dollarHelpText="Annual property insurance premium"
+            percentHelpText="Typically 0.3% - 0.6% of property value"
+            isDollarAnnual={true}
+            maxPercent={5}
           />
         </div>
 
@@ -131,24 +150,34 @@ export function Step4Expenses() {
             min={0}
           />
 
-          <InputField
-            name="maintenanceMonthly"
+          <ExpenseToggleField
+            dollarFieldName="maintenanceMonthly"
+            percentFieldName="maintenancePercent"
+            modeFieldName="maintenanceMode"
             label="Maintenance & Repairs"
-            type="currency"
-            placeholder="250"
-            helpText="Expected monthly maintenance costs (typically 1% of property value annually)"
-            min={0}
+            percentBaseValue={purchasePrice || 0}
+            percentBaseLabel="of value/year"
+            dollarPlaceholder="250"
+            percentPlaceholder="1"
+            dollarHelpText="Expected monthly maintenance costs"
+            percentHelpText="Rule of thumb: 1% of property value per year"
+            isDollarAnnual={false}
+            maxPercent={5}
           />
 
-          <InputField
-            name="propertyManagementPercent"
+          <ExpenseToggleField
+            dollarFieldName="propertyManagementMonthly"
+            percentFieldName="propertyManagementPercent"
+            modeFieldName="propertyManagementMode"
             label="Property Management Fee"
-            type="percentage"
-            placeholder="0"
-            helpText="Property management fee as % of gross rent (typically 8-10%)"
-            min={0}
-            max={50}
-            warning={warnings.propertyManagementPercent}
+            percentBaseValue={grossMonthlyIncome || 0}
+            percentBaseLabel="of rent"
+            dollarPlaceholder="0"
+            percentPlaceholder="8"
+            dollarHelpText="Fixed monthly management fee"
+            percentHelpText="Typically 8-10% of gross rent"
+            isDollarAnnual={false}
+            maxPercent={50}
           />
 
           <InputField

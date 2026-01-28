@@ -37,12 +37,25 @@ export interface CalculationInputs {
   vacancyRate: number; // Percentage (e.g., 5)
   annualRentIncrease: number; // Percentage (e.g., 3)
 
-  // Expenses
+  // Expenses (with optional % toggle support)
   propertyTaxAnnual: number;
+  propertyTaxPercent?: number; // % of purchase price
+  propertyTaxMode?: 'dollar' | 'percent';
+
   insuranceAnnual: number;
+  insurancePercent?: number; // % of purchase price
+  insuranceMode?: 'dollar' | 'percent';
+
   hoaMonthly: number;
+
   maintenanceMonthly: number;
+  maintenancePercent?: number; // % of purchase price annually
+  maintenanceMode?: 'dollar' | 'percent';
+
   propertyManagementPercent: number; // Percentage of gross rent
+  propertyManagementMonthly?: number; // Fixed $ amount
+  propertyManagementMode?: 'dollar' | 'percent';
+
   utilitiesMonthly: number;
   otherExpensesMonthly: number;
   annualExpenseIncrease: number; // Percentage (e.g., 2.5)
