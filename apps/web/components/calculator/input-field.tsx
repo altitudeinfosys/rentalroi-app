@@ -26,11 +26,19 @@ interface InputFieldProps {
 /**
  * Format value for display based on type
  */
-function formatValue(value: string, type: InputFieldType): string {
-  if (!value) return '';
+function formatValue(value: string | number | undefined | null, type: InputFieldType): string {
+  // Handle empty, null, undefined, or NaN values
+  if (value === undefined || value === null || value === '' ||
+      (typeof value === 'number' && isNaN(value)) ||
+      value === 'NaN') {
+    return '';
+  }
 
-  const numericValue = parseFloat(value.replace(/[^0-9.-]/g, ''));
-  if (isNaN(numericValue)) return value;
+  const stringValue = String(value);
+  const numericValue = parseFloat(stringValue.replace(/[^0-9.-]/g, ''));
+
+  // Return empty string if we can't parse a valid number
+  if (isNaN(numericValue)) return '';
 
   switch (type) {
     case 'currency':
@@ -45,7 +53,7 @@ function formatValue(value: string, type: InputFieldType): string {
     case 'number':
       return new Intl.NumberFormat('en-US').format(numericValue);
     default:
-      return value;
+      return stringValue;
   }
 }
 
@@ -84,34 +92,55 @@ export function InputField({
 
   // Update display value when value changes
   React.useEffect(() => {
-    if (!isFocused && value !== undefined && value !== '') {
-      if (type === 'text') {
-        setDisplayValue(value);
+    if (!isFocused) {
+      // Check for valid value (not undefined, null, empty, or NaN)
+      const isValidValue = value !== undefined &&
+        value !== null &&
+        value !== '' &&
+        !(typeof value === 'number' && isNaN(value));
+
+      if (isValidValue) {
+        if (type === 'text') {
+          setDisplayValue(String(value));
+        } else {
+          setDisplayValue(formatValue(value, type));
+        }
       } else {
-        setDisplayValue(formatValue(String(value), type));
+        setDisplayValue('');
       }
     }
   }, [value, isFocused, type]);
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    // Show raw value on focus
-    if (type !== 'text' && value !== undefined && value !== '') {
+    // Show raw value on focus (but not NaN)
+    const isValidValue = value !== undefined &&
+      value !== null &&
+      value !== '' &&
+      !(typeof value === 'number' && isNaN(value));
+
+    if (type !== 'text' && isValidValue) {
       setDisplayValue(String(value));
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    const rawValue = e.target.value;
+    const rawValue = e.target.value.trim();
 
     if (type === 'text') {
       setValue(name, rawValue);
       setDisplayValue(rawValue);
     } else {
-      const numericValue = parseFormattedValue(rawValue);
-      setValue(name, numericValue);
-      setDisplayValue(formatValue(String(numericValue), type));
+      // For numeric types, handle empty values
+      if (!rawValue) {
+        setValue(name, undefined);
+        setDisplayValue('');
+      } else {
+        const numericValue = parseFormattedValue(rawValue);
+        setValue(name, numericValue);
+        setDisplayValue(formatValue(numericValue, type));
+      }
     }
   };
 
