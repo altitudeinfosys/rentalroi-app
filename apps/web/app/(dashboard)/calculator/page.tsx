@@ -19,7 +19,15 @@ import { Step4Expenses } from '@/components/calculator/step4-expenses';
 import { Step5Results } from '@/components/calculator/step5-results';
 import { ProgressPreview } from '@/components/calculator/progress-preview';
 import { createClient } from '@/lib/supabase/client';
-import { getCalculation } from '@/lib/supabase/calculations';
+import { getCalculation, saveCalculation, updateCalculation } from '@/lib/supabase/calculations';
+import {
+  calculateMonthlyPayment,
+  calculateCashFlow,
+  calculateCashOnCashReturn,
+  calculateCapRate,
+  calculateTotalReturn,
+} from '@repo/calculations';
+import type { ComputedResults } from '@/lib/mappers/calculation-mapper';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -157,13 +165,87 @@ function CalculatorContent() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // For now, just save to localStorage
       const values = form.getValues();
-      localStorage.setItem('calculator_draft', JSON.stringify(values));
-      alert('Calculation saved locally!');
+
+      // First check if user is logged in
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        // Not logged in - save to localStorage and redirect to login
+        localStorage.setItem('calculator_draft', JSON.stringify(values));
+        const returnUrl = encodeURIComponent('/calculator');
+        window.location.href = `/login?redirect=${returnUrl}`;
+        return;
+      }
+
+      // Compute results for saving to database
+      const loanAmount = values.purchasePrice * (1 - values.downPaymentPercent / 100);
+      const monthlyPayment = calculateMonthlyPayment(
+        loanAmount,
+        values.interestRate,
+        values.loanTermYears
+      );
+
+      // Operating expenses (monthly)
+      const monthlyOperatingExpenses =
+        values.propertyTaxAnnual / 12 +
+        values.insuranceAnnual / 12 +
+        values.hoaMonthly +
+        values.maintenanceMonthly +
+        (values.monthlyRent * values.propertyManagementPercent / 100) +
+        values.utilitiesMonthly +
+        values.otherExpensesMonthly;
+
+      // Cash flow
+      const cashFlow = calculateCashFlow(
+        values.monthlyRent,
+        values.vacancyRate,
+        monthlyOperatingExpenses,
+        monthlyPayment
+      );
+
+      // Investment amounts
+      const downPayment = values.purchasePrice * (values.downPaymentPercent / 100);
+      const totalInvestment = downPayment + values.closingCosts + values.repairCosts;
+
+      // Calculate metrics
+      const annualCashFlow = cashFlow.cashFlow * 12;
+      const annualNOI = cashFlow.noi * 12;
+
+      const computedResults: ComputedResults = {
+        totalInvestment,
+        monthlyMortgagePayment: monthlyPayment,
+        monthlyGrossIncome: cashFlow.grossIncome,
+        monthlyExpenses: monthlyOperatingExpenses,
+        monthlyCashFlow: cashFlow.cashFlow,
+        annualCashFlow,
+        cashOnCashReturn: calculateCashOnCashReturn(annualCashFlow, totalInvestment),
+        capRate: calculateCapRate(annualNOI, values.purchasePrice),
+      };
+
+      // Save to database
+      let result;
+      if (editId) {
+        result = await updateCalculation(editId, user.id, values, computedResults);
+      } else {
+        result = await saveCalculation(user.id, values, computedResults);
+      }
+
+      if ('error' in result) {
+        alert(`Failed to save: ${result.error}`);
+        return;
+      }
+
+      // Clear localStorage draft on success
+      localStorage.removeItem('calculator_draft');
+
+      // Show success message and redirect to calculations list
+      alert('Calculation saved successfully!');
+      window.location.href = '/calculations';
     } catch (error) {
       console.error('Failed to save:', error);
-      alert('Failed to save calculation');
+      alert('Failed to save calculation. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -270,7 +352,7 @@ function CalculatorContent() {
                   disabled={isSaving}
                   className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
                 >
-                  {isSaving ? 'Saving...' : 'Save Draft'}
+                  {isSaving ? 'Saving...' : 'Save'}
                 </button>
               )}
             </div>
