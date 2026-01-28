@@ -34,6 +34,7 @@ const STEP_TITLES = {
 function CalculatorContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('id');
+  const isNew = searchParams.get('new') === 'true';
 
   const [currentStep, setCurrentStep] = React.useState<Step>(1);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -54,7 +55,15 @@ function CalculatorContent() {
   // Load existing calculation if editing
   React.useEffect(() => {
     if (!editId) {
-      // Not editing - try to load from localStorage
+      // If starting a new calculation, clear the draft
+      if (isNew) {
+        localStorage.removeItem('calculator_draft');
+        // Update URL to remove the ?new=true param
+        window.history.replaceState({}, '', '/calculator');
+        return;
+      }
+
+      // Not editing and not new - try to load from localStorage
       const draftStr = localStorage.getItem('calculator_draft');
       if (draftStr) {
         try {
@@ -99,7 +108,7 @@ function CalculatorContent() {
     };
 
     loadCalculation();
-  }, [editId, form]);
+  }, [editId, isNew, form]);
 
   // Debounced auto-save to localStorage (only for new calculations)
   React.useEffect(() => {

@@ -152,8 +152,9 @@ export function InputField({
           w-full px-4 py-2 border rounded-lg
           focus:outline-none focus:ring-2 focus:ring-blue-500
           disabled:bg-gray-100 disabled:cursor-not-allowed
+          bg-white text-gray-900
           dark:bg-gray-800 dark:border-gray-600 dark:text-white
-          ${error ? 'border-red-500' : 'border-gray-300'}
+          ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
           ${warning ? 'border-yellow-400' : ''}
         `}
         placeholder={placeholder}
@@ -243,8 +244,9 @@ export function SelectField({
           w-full px-4 py-2 border rounded-lg
           focus:outline-none focus:ring-2 focus:ring-blue-500
           disabled:bg-gray-100 disabled:cursor-not-allowed
+          bg-white text-gray-900
           dark:bg-gray-800 dark:border-gray-600 dark:text-white
-          ${error ? 'border-red-500' : 'border-gray-300'}
+          ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
         `}
         disabled={disabled}
       >

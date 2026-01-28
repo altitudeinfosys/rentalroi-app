@@ -17,7 +17,7 @@ const navItems = [
   },
   {
     label: 'New Calculation',
-    href: '/calculator',
+    href: '/calculator?new=true',
     icon: Calculator,
   },
   {
