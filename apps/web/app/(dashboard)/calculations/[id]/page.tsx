@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Pencil, Home, Building2, Building, Store, Warehouse } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getCalculationServer } from '@/lib/supabase/calculations'
+import { getCalculationServer } from '@/lib/supabase/calculations-server'
 
 const propertyTypeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   single_family: Home,

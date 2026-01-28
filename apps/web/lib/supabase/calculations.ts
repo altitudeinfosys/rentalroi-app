@@ -1,9 +1,8 @@
 /**
- * CRUD operations for calculations
+ * Client-side CRUD operations for calculations
  */
 
 import { createClient } from './client'
-import { createClient as createServerClient } from './server'
 import {
   formToDb,
   dbToForm,
@@ -75,30 +74,6 @@ export async function getCalculations(
   return {
     calculations: (data as DbCalculation[]).map(dbToSummary),
     total: count || 0,
-  }
-}
-
-/**
- * Get a single calculation by ID (server-side)
- */
-export async function getCalculationServer(id: string, userId: string) {
-  const supabase = await createServerClient()
-
-  const { data, error } = await supabase
-    .from('calculations')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .single()
-
-  if (error) {
-    console.error('Error fetching calculation:', error)
-    return { calculation: null, error: error.message }
-  }
-
-  return {
-    calculation: data as DbCalculation,
-    formData: dbToForm(data as DbCalculation),
   }
 }
 
