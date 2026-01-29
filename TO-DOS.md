@@ -26,8 +26,8 @@
 ## Pending
 
 ### Phase 3 - Remaining Items
-- [ ] Generate shareable links (share calculation with others)
-- [ ] Create shared view page (`/shared/[id]`)
+- [x] Generate shareable links (share calculation with others) - **DONE** (2026-01-29)
+- [x] Create shared view page (`/s/[token]`) - **DONE** (2026-01-29)
 - [ ] Configure OAuth providers in Supabase Dashboard (Google, Apple)
 
 ### Testing
