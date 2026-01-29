@@ -20,6 +20,7 @@ import { MetricsCard, MetricsGrid } from './metrics-card';
 import { ResultsChart, CHART_COLORS, formatPercentage } from './results-chart';
 import { ResultsTable } from './results-table';
 import { SaveCalculationButton } from './save-calculation-button';
+import { ShareButton } from './share-button';
 import { ToastContainer } from '@/components/ui/toast';
 import { useToast } from '@/lib/hooks/use-toast';
 import type { CalculatorFormData } from '@/lib/validation/calculator-schema';
@@ -211,13 +212,20 @@ export function Step5Results() {
             Complete analysis and {values.holdingLength}-year projection
           </p>
         </div>
-        <SaveCalculationButton
-          formData={formDataForSave}
-          results={computedResults}
-          calculationId={calculationId}
-          onSuccess={() => success('Calculation saved!', 'Your analysis has been saved to your account.')}
-          onError={(err) => error('Failed to save', err)}
-        />
+        <div className="flex gap-2">
+          <ShareButton
+            calculationId={calculationId}
+            onSuccess={(url) => success('Link copied!', 'Expires in 30 days.')}
+            onError={(err) => error('Failed to share', err)}
+          />
+          <SaveCalculationButton
+            formData={formDataForSave}
+            results={computedResults}
+            calculationId={calculationId}
+            onSuccess={() => success('Calculation saved!', 'Your analysis has been saved to your account.')}
+            onError={(err) => error('Failed to save', err)}
+          />
+        </div>
       </div>
 
       {/* Toast notifications */}
