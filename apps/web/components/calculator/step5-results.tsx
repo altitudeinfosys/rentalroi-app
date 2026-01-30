@@ -67,13 +67,18 @@ export function Step5Results() {
       values.loanTermYears
     );
 
+    // Property management: use dollar value if in dollar mode, otherwise calculate from percent
+    const propertyManagementFee = (values as any).propertyManagementMode === 'dollar'
+      ? ((values as any).propertyManagementMonthly || 0)
+      : (values.monthlyRent * values.propertyManagementPercent / 100);
+
     // Operating expenses (monthly)
     const monthlyOperatingExpenses =
       values.propertyTaxAnnual / 12 +
       values.insuranceAnnual / 12 +
       values.hoaMonthly +
       values.maintenanceMonthly +
-      (values.monthlyRent * values.propertyManagementPercent / 100) +
+      propertyManagementFee +
       values.utilitiesMonthly +
       values.otherExpensesMonthly;
 
@@ -433,13 +438,16 @@ function Tab1FirstYear({
                 ${values.maintenanceMonthly.toFixed(2)}
               </span>
             </div>
-            {values.propertyManagementPercent > 0 && (
+            {((values as any).propertyManagementMonthly > 0 || values.propertyManagementPercent > 0) && (
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Property Management
                 </span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${(values.monthlyRent * values.propertyManagementPercent / 100).toFixed(2)}
+                  ${((values as any).propertyManagementMode === 'dollar'
+                    ? ((values as any).propertyManagementMonthly || 0)
+                    : (values.monthlyRent * values.propertyManagementPercent / 100)
+                  ).toFixed(2)}
                 </span>
               </div>
             )}
