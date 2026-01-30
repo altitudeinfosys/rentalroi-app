@@ -132,9 +132,9 @@ export function InputField({
       setValue(name, rawValue);
       setDisplayValue(rawValue);
     } else {
-      // For numeric types, handle empty values
+      // For numeric types, set to 0 if empty (Zod expects numbers, not undefined)
       if (!rawValue) {
-        setValue(name, undefined);
+        setValue(name, 0);
         setDisplayValue('');
       } else {
         const numericValue = parseFormattedValue(rawValue);

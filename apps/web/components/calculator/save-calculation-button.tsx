@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { saveCalculation, updateCalculation } from '@/lib/supabase/calculations'
 import type { CalculatorFormData } from '@/lib/validation/calculator-schema'
 import type { ComputedResults } from '@/lib/mappers/calculation-mapper'
 import type { User } from '@supabase/supabase-js'
@@ -48,18 +47,21 @@ export function SaveCalculationButton({
     setIsLoading(true)
 
     try {
-      let result
+      // Use API route to save calculation (handles user creation server-side)
+      const response = await fetch('/api/calculations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formData,
+          results,
+          calculationId: calculationId || undefined,
+        }),
+      })
 
-      if (calculationId) {
-        // Update existing calculation
-        result = await updateCalculation(calculationId, user.id, formData, results)
-      } else {
-        // Create new calculation
-        result = await saveCalculation(user.id, formData, results)
-      }
+      const result = await response.json()
 
-      if ('error' in result) {
-        onError?.(result.error)
+      if (!response.ok || result.error) {
+        onError?.(result.error || 'Failed to save calculation')
         return
       }
 
@@ -69,7 +71,7 @@ export function SaveCalculationButton({
       onSuccess?.()
 
       // If this was a new calculation, redirect to calculations list
-      if (!calculationId && 'id' in result) {
+      if (!calculationId && result.id) {
         router.push('/calculations')
       }
     } catch (err) {

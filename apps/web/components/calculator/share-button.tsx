@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Share2, Loader2, Check, Link } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { createSharedLink } from '@/lib/supabase/shared-links'
 import type { User } from '@supabase/supabase-js'
 
 interface ShareButtonProps {
@@ -49,10 +48,17 @@ export function ShareButton({
     setIsLoading(true)
 
     try {
-      const result = await createSharedLink(calculationId, user.id)
+      // Use API route to create shared link (bypasses RLS)
+      const response = await fetch('/api/shared-links/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ calculationId }),
+      })
 
-      if ('error' in result) {
-        onError?.(result.error)
+      const result = await response.json()
+
+      if (!response.ok || result.error) {
+        onError?.(result.error || 'Failed to create share link')
         return
       }
 

@@ -19,7 +19,7 @@ import { Step4Expenses } from '@/components/calculator/step4-expenses';
 import { Step5Results } from '@/components/calculator/step5-results';
 import { ProgressPreview } from '@/components/calculator/progress-preview';
 import { createClient } from '@/lib/supabase/client';
-import { getCalculation, saveCalculation, updateCalculation } from '@/lib/supabase/calculations';
+import { getCalculation } from '@/lib/supabase/calculations';
 import {
   calculateMonthlyPayment,
   calculateCashFlow,
@@ -144,6 +144,20 @@ function CalculatorContent() {
     const isValid = await form.trigger(stepFields as any);
 
     if (!isValid) {
+      // Show which fields have errors - both in console and alert
+      const errors = form.formState.errors;
+      const errorFields = stepFields.filter(field => errors[field]);
+      if (errorFields.length > 0) {
+        const errorMessages = errorFields.map(f => `${f}: ${errors[f]?.message}`);
+        console.log('Validation errors:', errorMessages);
+        alert(`Please fix the following errors:\n\n${errorMessages.join('\n')}`);
+      } else {
+        // No specific field errors found, but validation still failed
+        // This can happen if form values are undefined
+        console.log('Validation failed but no specific errors found');
+        console.log('Form values:', form.getValues());
+        alert('Validation failed. Please ensure all required fields are filled in.');
+      }
       return;
     }
 
@@ -224,16 +238,21 @@ function CalculatorContent() {
         capRate: calculateCapRate(annualNOI, values.purchasePrice),
       };
 
-      // Save to database
-      let result;
-      if (editId) {
-        result = await updateCalculation(editId, user.id, values, computedResults);
-      } else {
-        result = await saveCalculation(user.id, values, computedResults);
-      }
+      // Use API route to save (handles user creation server-side)
+      const response = await fetch('/api/calculations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formData: values,
+          results: computedResults,
+          calculationId: editId || undefined,
+        }),
+      });
 
-      if ('error' in result) {
-        alert(`Failed to save: ${result.error}`);
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        alert(`Failed to save: ${result.error || 'Unknown error'}`);
         return;
       }
 
@@ -282,18 +301,30 @@ function CalculatorContent() {
     window.history.replaceState({}, '', '/calculator');
   };
 
-  // Check if all required fields are filled
+  // Check if minimum required fields are filled for saving
+  const canSave = React.useMemo(() => {
+    const values = form.watch();
+    // Minimum required: title, property type, purchase price, and monthly rent
+    return !!(
+      values.title &&
+      values.propertyType &&
+      values.purchasePrice > 0 &&
+      values.monthlyRent > 0
+    );
+  }, [form.watch()]);
+
+  // Check if all required fields are filled for viewing results
   const canViewResults = React.useMemo(() => {
     const values = form.watch();
     // Check required fields from steps 1-4
     return !!(
       values.title &&
       values.propertyType &&
-      values.purchasePrice &&
+      values.purchasePrice > 0 &&
       values.downPaymentPercent !== undefined &&
       values.interestRate &&
       values.loanTermYears &&
-      values.monthlyRent &&
+      values.monthlyRent > 0 &&
       values.vacancyRate !== undefined &&
       values.propertyTaxAnnual !== undefined &&
       values.insuranceAnnual !== undefined &&
@@ -349,8 +380,13 @@ function CalculatorContent() {
               {!editId && (
                 <button
                   onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+                  disabled={isSaving || !canSave}
+                  title={!canSave ? 'Fill in title, property type, purchase price, and monthly rent to save' : ''}
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${
+                    canSave
+                      ? 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
+                      : 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                  } disabled:opacity-50`}
                 >
                   {isSaving ? 'Saving...' : 'Save'}
                 </button>

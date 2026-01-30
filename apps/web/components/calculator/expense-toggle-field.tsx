@@ -273,10 +273,8 @@ export function ExpenseToggleField({
         </p>
       )}
 
-      {/* Hidden inputs to register with form */}
-      <input type="hidden" {...register(dollarFieldName)} />
-      <input type="hidden" {...register(percentFieldName)} />
-      <input type="hidden" {...register(modeFieldName)} />
+      {/* Note: Form values are managed via setValue() calls in this component.
+          No hidden inputs needed since react-hook-form tracks values internally. */}
     </div>
   );
 }

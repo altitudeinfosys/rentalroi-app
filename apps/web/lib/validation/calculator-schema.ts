@@ -97,10 +97,11 @@ export const step4Schema = z.object({
     .number()
     .min(0, 'Property tax cannot be negative')
     .max(10000000, 'Property tax is too high'),
+  // Note: percent can exceed typical range when calculated from dollar value
   propertyTaxPercent: z
     .number()
     .min(0, 'Property tax % cannot be negative')
-    .max(10, 'Property tax % is too high')
+    .max(25, 'Property tax % is too high')
     .optional(),
   propertyTaxMode: z.enum(expenseModes).optional(),
 
@@ -109,10 +110,11 @@ export const step4Schema = z.object({
     .number()
     .min(0, 'Insurance cannot be negative')
     .max(1000000, 'Insurance is too high'),
+  // Note: percent can exceed typical range when calculated from dollar value
   insurancePercent: z
     .number()
     .min(0, 'Insurance % cannot be negative')
-    .max(5, 'Insurance % is too high')
+    .max(20, 'Insurance % is too high')
     .optional(),
   insuranceMode: z.enum(expenseModes).optional(),
 
@@ -121,18 +123,20 @@ export const step4Schema = z.object({
     .number()
     .min(0, 'Maintenance cannot be negative')
     .max(100000, 'Maintenance is too high'),
+  // Note: percent can exceed typical range when calculated from dollar value
   maintenancePercent: z
     .number()
     .min(0, 'Maintenance % cannot be negative')
-    .max(5, 'Maintenance % is too high')
+    .max(50, 'Maintenance % is too high')
     .optional(),
   maintenanceMode: z.enum(expenseModes).optional(),
 
   // Property Management - with toggle (reverse: default is %)
+  // Note: percent can exceed 50% when calculated from dollar value
   propertyManagementPercent: z
     .number()
     .min(0, 'Management fee cannot be negative')
-    .max(50, 'Management fee cannot exceed 50%'),
+    .max(100, 'Management fee cannot exceed 100%'),
   propertyManagementMonthly: z
     .number()
     .min(0, 'Management fee cannot be negative')
