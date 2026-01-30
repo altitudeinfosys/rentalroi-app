@@ -203,13 +203,18 @@ function CalculatorContent() {
         values.loanTermYears
       );
 
+      // Property management: use dollar value if in dollar mode
+      const propertyManagementFee = (values as any).propertyManagementMode === 'dollar'
+        ? ((values as any).propertyManagementMonthly || 0)
+        : (values.monthlyRent * values.propertyManagementPercent / 100);
+
       // Operating expenses (monthly)
       const monthlyOperatingExpenses =
         values.propertyTaxAnnual / 12 +
         values.insuranceAnnual / 12 +
         values.hoaMonthly +
         values.maintenanceMonthly +
-        (values.monthlyRent * values.propertyManagementPercent / 100) +
+        propertyManagementFee +
         values.utilitiesMonthly +
         values.otherExpensesMonthly;
 

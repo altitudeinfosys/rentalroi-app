@@ -32,6 +32,8 @@ export function ProgressPreview({ currentStep }: ProgressPreviewProps) {
   const hoaMonthly = watch('hoaMonthly');
   const maintenanceMonthly = watch('maintenanceMonthly');
   const propertyManagementPercent = watch('propertyManagementPercent');
+  const propertyManagementMonthly = watch('propertyManagementMonthly');
+  const propertyManagementMode = watch('propertyManagementMode');
   const utilitiesMonthly = watch('utilitiesMonthly');
   const otherExpensesMonthly = watch('otherExpensesMonthly');
 
@@ -68,9 +70,11 @@ export function ProgressPreview({ currentStep }: ProgressPreviewProps) {
   if (currentStep >= 4) {
     const propertyTaxMonthly = (propertyTaxAnnual || 0) / 12;
     const insuranceMonthly = (insuranceAnnual || 0) / 12;
-    const managementFee = propertyManagementPercent
-      ? (grossMonthlyIncome * propertyManagementPercent) / 100
-      : 0;
+    const managementFee = propertyManagementMode === 'dollar'
+      ? (propertyManagementMonthly || 0)
+      : propertyManagementPercent
+        ? (grossMonthlyIncome * propertyManagementPercent) / 100
+        : 0;
 
     monthlyExpenses =
       propertyTaxMonthly +
