@@ -18,6 +18,8 @@ import { Step3Income } from '@/components/calculator/step3-income';
 import { Step4Expenses } from '@/components/calculator/step4-expenses';
 import { Step5Results } from '@/components/calculator/step5-results';
 import { ProgressPreview } from '@/components/calculator/progress-preview';
+import { ToastContainer } from '@/components/ui/toast';
+import { useToast } from '@/lib/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { getCalculation } from '@/lib/supabase/calculations';
 import {
@@ -48,6 +50,7 @@ function CalculatorContent() {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(!!editId);
   const [editTitle, setEditTitle] = React.useState<string | null>(null);
+  const { toasts, removeToast, success, error: showError, warning } = useToast();
 
   // Initialize form with default values
   const form = useForm<CalculatorFormData>({
@@ -144,19 +147,18 @@ function CalculatorContent() {
     const isValid = await form.trigger(stepFields as any);
 
     if (!isValid) {
-      // Show which fields have errors - both in console and alert
+      // Show which fields have errors
       const errors = form.formState.errors;
       const errorFields = stepFields.filter(field => errors[field]);
       if (errorFields.length > 0) {
         const errorMessages = errorFields.map(f => `${f}: ${errors[f]?.message}`);
         console.log('Validation errors:', errorMessages);
-        alert(`Please fix the following errors:\n\n${errorMessages.join('\n')}`);
+        showError('Validation Error', errorMessages.join(', '));
       } else {
         // No specific field errors found, but validation still failed
-        // This can happen if form values are undefined
         console.log('Validation failed but no specific errors found');
         console.log('Form values:', form.getValues());
-        alert('Validation failed. Please ensure all required fields are filled in.');
+        warning('Missing Fields', 'Please ensure all required fields are filled in.');
       }
       return;
     }
@@ -252,7 +254,7 @@ function CalculatorContent() {
       const result = await response.json();
 
       if (!response.ok || result.error) {
-        alert(`Failed to save: ${result.error || 'Unknown error'}`);
+        showError('Save Failed', result.error || 'Unknown error');
         return;
       }
 
@@ -260,11 +262,13 @@ function CalculatorContent() {
       localStorage.removeItem('calculator_draft');
 
       // Show success message and redirect to calculations list
-      alert('Calculation saved successfully!');
-      window.location.href = '/calculations';
+      success('Saved!', 'Calculation saved successfully. Redirecting...');
+      setTimeout(() => {
+        window.location.href = '/calculations';
+      }, 1500);
     } catch (error) {
       console.error('Failed to save:', error);
-      alert('Failed to save calculation. Please try again.');
+      showError('Save Failed', 'Failed to save calculation. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -284,7 +288,7 @@ function CalculatorContent() {
       setCurrentStep(5);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      alert('Please fill in all required fields before viewing results.');
+      warning('Incomplete Form', 'Please fill in all required fields before viewing results.');
     }
   };
 
@@ -346,6 +350,7 @@ function CalculatorContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Progress Indicator */}
         <div className="mb-8">

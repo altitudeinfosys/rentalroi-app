@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { formToDb, type ComputedResults } from '@/lib/mappers/calculation-mapper'
-import type { CalculatorFormData } from '@/lib/validation/calculator-schema'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { formToDb, type ComputedResults } from '@/lib/mappers/calculation-mapper'
+import { calculatorSchema, type CalculatorFormData } from '@/lib/validation/calculator-schema'
+import { getAuthenticatedUser } from '@/lib/supabase/auth'
 
 /**
  * POST /api/calculations/save
@@ -10,19 +11,13 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
  */
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user
+    const { user, error: authError } = await getAuthenticatedUser()
+    if (authError) return authError
+
     const supabase = await createClient()
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Parse request body
+    // Parse and validate request body
     const body = await request.json()
     const { formData, results, calculationId } = body as {
       formData: CalculatorFormData
@@ -37,16 +32,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use service role client to bypass RLS for all operations
-    // This is needed because:
-    // 1. The user might not exist in public.users yet
-    // 2. The RLS policy for calculations checks get_user_tier() which queries users table
+    // Validate form data with Zod
+    const parsed = calculatorSchema.safeParse(formData)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid form data', details: parsed.error.issues },
+        { status: 400 }
+      )
+    }
+
+    // Use service role ONLY for user creation (minimal scope)
     const serviceSupabase = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Step 1: Ensure user exists in public.users
+    // Step 1: Ensure user exists in public.users (service role needed here)
     const { error: upsertError } = await serviceSupabase
       .from('users')
       .upsert(
@@ -55,30 +56,39 @@ export async function POST(request: NextRequest) {
           email: user.email!,
           full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
         },
-        { onConflict: 'id', ignoreDuplicates: true }
+        { onConflict: 'id', ignoreDuplicates: false } // Update on conflict for consistency
       )
 
     if (upsertError) {
-      console.error('Error ensuring user exists:', upsertError)
+      console.error('Error ensuring user exists:', {
+        error: upsertError,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      })
       return NextResponse.json(
-        { error: `Failed to create user profile: ${upsertError.message}` },
+        { error: 'Failed to create user profile' },
         { status: 500 }
       )
     }
 
-    // Step 2: Save the calculation using service role (bypasses RLS)
-    const dbData = formToDb(formData, user.id, results)
+    // Step 2: Save the calculation using authenticated client (respects RLS)
+    const dbData = formToDb(parsed.data, user.id, results)
 
     if (calculationId) {
-      // Update existing
-      const { error } = await serviceSupabase
+      // Update existing - verify ownership via RLS
+      const { error } = await supabase
         .from('calculations')
         .update(dbData)
         .eq('id', calculationId)
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error updating calculation:', error)
+        console.error('Error updating calculation:', {
+          error,
+          userId: user.id,
+          calculationId,
+          timestamp: new Date().toISOString()
+        })
         return NextResponse.json(
           { error: error.message },
           { status: 500 }
@@ -88,14 +98,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, id: calculationId })
     } else {
       // Insert new
-      const { data, error } = await serviceSupabase
+      const { data, error } = await supabase
         .from('calculations')
         .insert(dbData)
         .select('id')
         .single()
 
       if (error) {
-        console.error('Error saving calculation:', error)
+        console.error('Error saving calculation:', {
+          error,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        })
         return NextResponse.json(
           { error: error.message },
           { status: 500 }
