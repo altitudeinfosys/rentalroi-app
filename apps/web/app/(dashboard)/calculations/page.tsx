@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { getCalculations, deleteCalculation } from '@/lib/supabase/calculations'
 import { CalculationCard } from '@/components/calculations/calculation-card'
+import { CalculationsGridSkeleton } from '@/components/calculations/calculation-card-skeleton'
 import { EmptyState } from '@/components/calculations/empty-state'
 import { DeleteDialog } from '@/components/calculations/delete-dialog'
 import { ToastContainer } from '@/components/ui/toast'
@@ -146,9 +147,7 @@ export default function CalculationsPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
+        <CalculationsGridSkeleton count={6} />
       ) : calculations.length === 0 ? (
         <EmptyState />
       ) : (
