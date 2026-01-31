@@ -45,6 +45,16 @@
   - [ ] Google OAuth setup
   - [ ] Apple OAuth setup
 
+### Database & Infrastructure
+- [ ] **DEV/PROD Database Verification**
+  - [ ] Set up Supabase CLI for schema comparison
+  - [ ] Create script to compare DEV vs PROD schemas
+  - [ ] Verify tables match (calculations, profiles, etc.)
+  - [ ] Verify RLS policies are equivalent
+  - [ ] Verify functions/triggers are synced
+  - [ ] Set up automated schema diff check (CI/CD)
+  - [ ] Document migration workflow
+
 ### Phase 4 - Testing
 - [ ] **Unit Tests - Calculation Engine**
   - [ ] Test mortgage payment calculations
@@ -103,13 +113,54 @@
   - [ ] Configure domain and SSL
   - [ ] Set up monitoring and error tracking
 
+### Phase 6 - Mobile App 📱
+- [ ] **React Native / Expo Setup**
+  - [ ] Configure apps/mobile with shared packages
+  - [ ] Set up navigation (React Navigation)
+  - [ ] Configure Supabase client for mobile
+  - [ ] Set up secure token storage
+
+- [ ] **Core Screens**
+  - [ ] Login / Signup screens
+  - [ ] Dashboard / Home screen
+  - [ ] Calculator wizard (mobile-optimized)
+  - [ ] Saved calculations list
+  - [ ] Calculation detail view
+  - [ ] Settings / Profile screen
+
+- [ ] **Mobile-Specific Features**
+  - [ ] Push notifications
+  - [ ] Biometric authentication (Face ID / Touch ID)
+  - [ ] Offline support with local storage
+  - [ ] Share sheet integration
+
+- [ ] **App Store Deployment**
+  - [ ] iOS App Store submission
+  - [ ] Google Play Store submission
+  - [ ] App Store screenshots and metadata
+
+### Phase 7 - Property Data Integration 🏠
+- [ ] **Zillow Link Scraper**
+  - [ ] Create API endpoint to accept Zillow URL
+  - [ ] Parse Zillow page for property data (price, beds, baths, sqft, address)
+  - [ ] Extract property tax estimates
+  - [ ] Handle rate limiting and error cases
+  - [ ] Pre-populate calculator form with scraped data
+  - [ ] Add "Import from Zillow" button to calculator
+
+- [ ] **Alternative Data Sources**
+  - [ ] Redfin integration
+  - [ ] Realtor.com integration
+  - [ ] MLS API integration (if available)
+
 ### Future Enhancements 🔮
 - [ ] PDF export for calculations
 - [ ] Property comparison tool
 - [ ] Pro subscription with Stripe
 - [ ] Email notifications
-- [ ] Property address autocomplete
-- [ ] Import property data from Zillow/Redfin APIs
+- [ ] Property address autocomplete with Google Places API
+- [ ] Rental estimate integration (Rentometer, Zillow Rent Zestimate)
+- [ ] Neighborhood data (crime stats, schools, walkability)
 
 ---
 
@@ -122,3 +173,21 @@
 - Cap Rate: `NOI / Purchase Price`
 - Cash-on-Cash: `Annual Cash Flow / Total Cash Invested`
 - Total ROI: `(Cash Flow + Appreciation + Equity) / Investment`
+
+**Mobile App Location:** `apps/mobile/` (React Native / Expo)
+
+**Database Verification Commands:**
+```bash
+# Compare schemas using Supabase CLI
+supabase db diff --linked --schema public
+
+# Pull schema from remote
+supabase db pull --linked
+
+# Check migration status
+supabase migration list --linked
+```
+
+**Supabase Projects:**
+- DEV: [Add project ref here]
+- PROD: [Add project ref here]
