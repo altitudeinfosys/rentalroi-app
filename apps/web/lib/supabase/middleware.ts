@@ -47,6 +47,16 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   )
 
+  // Check if on marketing landing page
+  const isMarketingPage = request.nextUrl.pathname === '/'
+
+  // Redirect authenticated users from marketing page to dashboard
+  if (user && isMarketingPage) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
   // Redirect to login if accessing protected route without auth
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
@@ -58,7 +68,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect to dashboard if accessing auth routes while logged in
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

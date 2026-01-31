@@ -12,7 +12,7 @@ interface SidebarProps {
 const navItems = [
   {
     label: 'Overview',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
   },
   {
@@ -78,7 +78,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Logo (desktop) */}
         <div className="hidden lg:flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+          <Link href="/dashboard" className="text-xl font-bold text-gray-900 dark:text-white">
             RentalROI
           </Link>
         </div>
