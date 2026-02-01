@@ -11,6 +11,8 @@ export function Skeleton({ className }: SkeletonProps) {
         'animate-pulse rounded-md bg-gray-200 dark:bg-gray-700',
         className
       )}
+      role="status"
+      aria-label="Loading..."
     />
   )
 }

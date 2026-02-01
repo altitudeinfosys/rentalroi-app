@@ -1,7 +1,11 @@
+'use client'
+
 import { FileQuestion, Home, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function NotFound() {
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-charcoal-950 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
@@ -29,7 +33,7 @@ export default function NotFound() {
             Go Home
           </Link>
           <button
-            onClick={() => typeof window !== 'undefined' && window.history.back()}
+            onClick={() => router.back()}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-charcoal-800 text-charcoal-700 dark:text-cream-200 font-semibold rounded-lg border border-charcoal-200 dark:border-charcoal-700 hover:bg-charcoal-50 dark:hover:bg-charcoal-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

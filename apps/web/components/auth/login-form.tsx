@@ -1,14 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { getSafeRedirectPath } from '@/lib/utils/safe-redirect'
 
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+
+  // Validate redirect to prevent open redirect attacks
+  const redirect = useMemo(() => {
+    return getSafeRedirectPath(searchParams.get('redirect'), '/dashboard')
+  }, [searchParams])
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

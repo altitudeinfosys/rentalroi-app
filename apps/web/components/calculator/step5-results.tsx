@@ -1036,23 +1036,13 @@ function Tab4Assumptions({ values }: { values: CalculationInputs }) {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">Selling Costs</span>
             <span className="text-sm font-semibold text-gray-900 dark:text-white">
-              {values.sellingCostPercent}%
+              {values.saleClosingCostsPercent}%
             </span>
           </div>
         </div>
       </div>
 
-      {/* Notes */}
-      {values.notes && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 p-6">
-          <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-            Notes
-          </h3>
-          <p className="text-sm text-yellow-800 dark:text-yellow-200 whitespace-pre-wrap">
-            {values.notes}
-          </p>
-        </div>
-      )}
+      {/* Notes - TODO: Add notes field to calculator schema if needed */}
     </div>
   );
 }

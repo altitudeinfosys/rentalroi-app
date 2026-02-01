@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -12,6 +12,40 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isValidSession, setIsValidSession] = useState<boolean | null>(null)
+
+  // Verify the user has a valid password recovery session
+  useEffect(() => {
+    const checkAuthState = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        // No session - redirect to forgot password
+        setError('Reset link is invalid or expired. Please request a new one.')
+        setIsValidSession(false)
+        return
+      }
+
+      // User has a valid session, they can reset their password
+      setIsValidSession(true)
+    }
+
+    checkAuthState()
+
+    // Also listen for auth state changes
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsValidSession(true)
+        setError(null)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +84,54 @@ export default function ResetPasswordPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading while checking auth state
+  if (isValidSession === null) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="flex items-center justify-center py-8">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    )
+  }
+
+  // Show error if session is invalid
+  if (isValidSession === false) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-600 dark:text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Invalid Reset Link
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            This password reset link is invalid or has expired. Please request a new one.
+          </p>
+          <Link
+            href="/forgot-password"
+            className="inline-block py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            Request New Link
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   if (isSuccess) {

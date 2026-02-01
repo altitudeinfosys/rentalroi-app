@@ -25,11 +25,18 @@ export function DeleteDialog({ isOpen, title, onConfirm, onCancel }: DeleteDialo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
         onClick={onCancel}
+        aria-hidden="true"
       />
 
       {/* Dialog */}
@@ -37,6 +44,7 @@ export function DeleteDialog({ isOpen, title, onConfirm, onCancel }: DeleteDialo
         {/* Close button */}
         <button
           onClick={onCancel}
+          aria-label="Close delete dialog"
           className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
           <X className="w-5 h-5" />
@@ -48,10 +56,16 @@ export function DeleteDialog({ isOpen, title, onConfirm, onCancel }: DeleteDialo
         </div>
 
         {/* Content */}
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">
+        <h3
+          id="delete-dialog-title"
+          className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2"
+        >
           Delete Calculation
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+        <p
+          id="delete-dialog-description"
+          className="text-gray-600 dark:text-gray-400 text-center mb-6"
+        >
           Are you sure you want to delete <strong>&quot;{title}&quot;</strong>? This action cannot be undone.
         </p>
 

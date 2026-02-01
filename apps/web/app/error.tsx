@@ -14,6 +14,12 @@ export default function Error({
   useEffect(() => {
     // Log error to console in development
     console.error('Application error:', error)
+
+    // TODO: Add production error reporting service (e.g., Sentry, LogRocket)
+    // Example with Sentry:
+    // if (process.env.NODE_ENV === 'production') {
+    //   Sentry.captureException(error)
+    // }
   }, [error])
 
   return (
@@ -47,6 +53,7 @@ export default function Error({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
+            aria-label="Try again to reload the page"
             className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
           >
             <RefreshCw className="w-4 h-4" />

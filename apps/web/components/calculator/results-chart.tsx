@@ -120,12 +120,23 @@ function defaultFormatValue(value: number): string {
 /**
  * Custom Tooltip Component
  */
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    name: string
+    color?: string
+  }>
+  label?: string
+  formatValue?: (value: number) => string
+}
+
 function CustomTooltip({
   active,
   payload,
   label,
   formatValue = defaultFormatValue,
-}: TooltipProps<number, string> & { formatValue?: (value: number) => string }) {
+}: CustomTooltipProps) {
   if (!active || !payload || !payload.length) {
     return null;
   }
@@ -176,15 +187,15 @@ export function ResultsChart({
   };
 
   const xAxisProps = {
-    dataKey: 'label',
+    dataKey: 'label' as const,
     tick: { fontSize: 12 },
-    label: xAxisLabel ? { value: xAxisLabel, position: 'insideBottom', offset: -5 } : undefined,
+    label: xAxisLabel ? { value: xAxisLabel, position: 'insideBottom' as const, offset: -5 } : undefined,
   };
 
   const yAxisProps = {
     tick: { fontSize: 12 },
     tickFormatter: formatValue,
-    label: yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft' } : undefined,
+    label: yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft' as const } : undefined,
   };
 
   const gridProps = showGrid

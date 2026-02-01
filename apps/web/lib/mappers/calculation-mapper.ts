@@ -196,9 +196,23 @@ export function dbToForm(db: DbCalculation): CalculatorFormData {
 /**
  * Extract summary data for calculation cards
  */
-export function dbToSummary(db: DbCalculation) {
+export function dbToSummary(db: DbCalculation): {
+  id: string
+  title: string
+  propertyType: string
+  address: string | null | undefined
+  city: string | null | undefined
+  state: string | null | undefined
+  purchasePrice: number
+  monthlyCashFlow: number | null | undefined
+  annualCashFlow: number | null | undefined
+  cashOnCashReturn: number | null | undefined
+  capRate: number | null | undefined
+  createdAt: string | undefined
+  updatedAt: string | undefined
+} {
   return {
-    id: db.id,
+    id: db.id!, // id is always present when reading from DB
     title: db.title,
     propertyType: db.property_type,
     address: db.address,

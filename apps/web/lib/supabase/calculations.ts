@@ -168,8 +168,14 @@ export async function checkCalculationLimit(userId: string): Promise<{
     .eq('id', userId)
     .single()
 
-  if (error || !user) {
-    // If no user record, assume free tier with 0 calculations
+  if (error) {
+    // On error, deny creation to prevent rate limit bypass
+    console.error('Error checking calculation limit:', error)
+    return { canCreate: false, current: 0, limit: 5 }
+  }
+
+  if (!user) {
+    // New user with no record yet - allow creation
     return { canCreate: true, current: 0, limit: 5 }
   }
 
