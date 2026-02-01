@@ -1,6 +1,12 @@
 /**
  * Utility to validate redirect URLs and prevent open redirect attacks.
  * Only allows relative paths starting with / (no protocol, no external domains).
+ *
+ * Security features:
+ * - Decodes percent-encoded characters before validation
+ * - Normalizes paths to resolve dot-segments (../, ./)
+ * - Only allows explicitly allowlisted paths
+ * - Prevents protocol-relative URLs, backslashes, and @ symbols
  */
 
 const ALLOWED_PATHS = [
@@ -10,6 +16,27 @@ const ALLOWED_PATHS = [
   '/settings',
   '/reset-password',
 ]
+
+/**
+ * Normalizes a path by decoding and resolving dot-segments.
+ * Returns null if the path is malformed or cannot be normalized safely.
+ */
+function normalizePath(path: string): string | null {
+  try {
+    // Decode percent-encoded characters
+    const decoded = decodeURIComponent(path)
+
+    // Use URL constructor to normalize the path (resolves ../ and ./)
+    // We use a dummy base URL since we only care about the pathname
+    const url = new URL(decoded, 'http://localhost')
+
+    // Return the normalized pathname (URL constructor handles dot-segments)
+    return url.pathname
+  } catch {
+    // If decoding or URL parsing fails, the path is malformed
+    return null
+  }
+}
 
 /**
  * Validates a redirect path to prevent open redirect vulnerabilities.
@@ -46,21 +73,37 @@ export function getSafeRedirectPath(
     return fallback
   }
 
-  // Extract just the pathname (strip query params for validation)
-  const pathname = path.split('?')[0]
+  // Normalize the path to handle encoded characters and dot-segments
+  // This prevents bypasses like /dashboard/../admin or %2e%2e/admin
+  const normalizedPath = normalizePath(path)
 
-  // Check if it's an allowed path or starts with an allowed path
-  const isAllowed = ALLOWED_PATHS.some(
-    (allowed) => pathname === allowed || pathname.startsWith(`${allowed}/`)
-  )
-
-  // For strict security, only allow known paths
-  // If you want to allow any relative path, remove this check
-  if (!isAllowed && pathname !== '/') {
+  if (!normalizedPath) {
     return fallback
   }
 
-  return path
+  // Re-check security constraints on normalized path
+  if (!normalizedPath.startsWith('/') || normalizedPath.startsWith('//')) {
+    return fallback
+  }
+
+  // Check if normalized path is an allowed path or starts with an allowed path
+  const isAllowed = ALLOWED_PATHS.some(
+    (allowed) => normalizedPath === allowed || normalizedPath.startsWith(`${allowed}/`)
+  )
+
+  // For strict security, only allow known paths
+  if (!isAllowed && normalizedPath !== '/') {
+    return fallback
+  }
+
+  // Return the normalized path (not the original) to prevent any bypass
+  // Preserve query string from original if present
+  const queryIndex = path.indexOf('?')
+  if (queryIndex !== -1) {
+    return normalizedPath + path.substring(queryIndex)
+  }
+
+  return normalizedPath
 }
 
 /**
