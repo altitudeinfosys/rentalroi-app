@@ -197,6 +197,8 @@ export function Step5Results() {
     hoaMonthly: values.hoaMonthly,
     maintenanceMonthly: values.maintenanceMonthly,
     propertyManagementPercent: values.propertyManagementPercent,
+    propertyManagementMode: values.propertyManagementMode || 'percent',
+    propertyManagementMonthly: values.propertyManagementMonthly ?? 0,
     utilitiesMonthly: values.utilitiesMonthly,
     otherExpensesMonthly: values.otherExpensesMonthly,
     annualExpenseIncrease: values.annualExpenseIncrease,
@@ -1152,7 +1154,7 @@ function Tab5Amortization({
       <ResultsChart
         type="area"
         data={amortization.map((year: any) => ({
-          year: `Year ${year.year}`,
+          label: `Year ${year.year}`,
           Principal: year.principal,
           Interest: year.interest,
         }))}

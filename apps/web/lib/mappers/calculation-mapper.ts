@@ -43,6 +43,8 @@ export interface DbCalculation {
   hoa_monthly: number
   maintenance_monthly: number
   property_management_percent: number
+  property_management_mode?: string | null
+  property_management_monthly?: number | null
   utilities_monthly: number
   other_expenses_monthly: number
   annual_expense_increase: number
@@ -123,6 +125,8 @@ export function formToDb(
     hoa_monthly: form.hoaMonthly,
     maintenance_monthly: form.maintenanceMonthly,
     property_management_percent: form.propertyManagementPercent,
+    property_management_mode: form.propertyManagementMode || 'percent',
+    property_management_monthly: form.propertyManagementMonthly ?? 0,
     utilities_monthly: form.utilitiesMonthly,
     other_expenses_monthly: form.otherExpensesMonthly,
     annual_expense_increase: form.annualExpenseIncrease,
@@ -182,6 +186,8 @@ export function dbToForm(db: DbCalculation): CalculatorFormData {
     hoaMonthly: db.hoa_monthly,
     maintenanceMonthly: db.maintenance_monthly,
     propertyManagementPercent: db.property_management_percent,
+    propertyManagementMode: (db.property_management_mode as 'percent' | 'dollar') || 'percent',
+    propertyManagementMonthly: db.property_management_monthly ?? 0,
     utilitiesMonthly: db.utilities_monthly,
     otherExpensesMonthly: db.other_expenses_monthly,
     annualExpenseIncrease: db.annual_expense_increase,
