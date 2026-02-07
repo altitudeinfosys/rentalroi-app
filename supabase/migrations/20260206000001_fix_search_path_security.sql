@@ -9,9 +9,6 @@ RETURNS subscription_tier AS $$
 DECLARE
   tier subscription_tier;
 BEGIN
-  -- Pin search_path to prevent hijacking
-  SET LOCAL search_path = public, pg_catalog;
-
   SELECT subscription_tier INTO tier
   FROM users
   WHERE id = auth.uid();
@@ -28,9 +25,6 @@ RETURNS INTEGER AS $$
 DECLARE
   calc_count INTEGER;
 BEGIN
-  -- Pin search_path to prevent hijacking
-  SET LOCAL search_path = public, pg_catalog;
-
   SELECT calculations_this_month INTO calc_count
   FROM users
   WHERE id = auth.uid();
