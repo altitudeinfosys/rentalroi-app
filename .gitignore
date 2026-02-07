@@ -38,6 +38,12 @@ yarn-error.log*
 .env
 .env.production
 
+# Scripts with credentials
+scripts/run-migrations*.ts
+scripts/apply-migration*.ts
+scripts/verify-migrations.ts
+test-supabase.ts
+
 # Vercel
 .vercel
 
