@@ -4,9 +4,17 @@
  *
  * Security features:
  * - Decodes percent-encoded characters before validation
+ * - Rejects control characters (null bytes, etc.) that could cause parsing issues
  * - Normalizes paths to resolve dot-segments (../, ./)
  * - Only allows explicitly allowlisted paths
  * - Prevents protocol-relative URLs, backslashes, and @ symbols
+ * - Returns normalized path (not original) to prevent bypass attempts
+ *
+ * Attack vectors prevented:
+ * - Open redirects: //evil.com, /\evil.com
+ * - Path traversal: /../admin, /%2e%2e/admin
+ * - Null byte injection: /%00/admin
+ * - Protocol smuggling: javascript:, data:
  */
 
 const ALLOWED_PATHS = [
@@ -25,6 +33,13 @@ function normalizePath(path: string): string | null {
   try {
     // Decode percent-encoded characters
     const decoded = decodeURIComponent(path)
+
+    // Reject paths with null bytes or other control characters (security hardening)
+    // These could cause parsing inconsistencies across different systems
+    // eslint-disable-next-line no-control-regex
+    if (/[\x00-\x1f\x7f]/.test(decoded)) {
+      return null
+    }
 
     // Use URL constructor to normalize the path (resolves ../ and ./)
     // We use a dummy base URL since we only care about the pathname
