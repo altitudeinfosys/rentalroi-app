@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { DEFAULT_VALUES } from '@repo/calculations';
 import { calculatorSchema, getStepFields, type CalculatorFormData } from '@/lib/validation/calculator-schema';
 import { Step1PropertyDetails } from '@/components/calculator/step1-property-details';
+import { UrlImport } from '@/components/calculator/url-import';
 import { Step2PurchaseFinancing } from '@/components/calculator/step2-purchase-financing';
 import { Step3Income } from '@/components/calculator/step3-income';
 import { Step4Expenses } from '@/components/calculator/step4-expenses';
@@ -465,7 +466,12 @@ function CalculatorContent() {
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Step Content */}
             <div className="mb-8">
-              {currentStep === 1 && <Step1PropertyDetails />}
+              {currentStep === 1 && (
+                <>
+                  <UrlImport />
+                  <Step1PropertyDetails />
+                </>
+              )}
               {currentStep === 2 && <Step2PurchaseFinancing />}
               {currentStep === 3 && <Step3Income />}
               {currentStep === 4 && <Step4Expenses />}
