@@ -2,12 +2,34 @@
 
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Loader2, Link, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Loader2, Link, CheckCircle, AlertCircle, X, Search } from 'lucide-react';
 import { DEFAULT_VALUES, getDefaultsForPropertyType } from '@repo/calculations';
 import type { CalculatorFormData } from '@/lib/validation/calculator-schema';
 import type { ExtractPropertyResponse, ExtractedPropertyData } from '@/lib/extractors/types';
 
 type ImportStatus = 'idle' | 'loading' | 'success' | 'error';
+
+/**
+ * Detect if input looks like a street address rather than a URL.
+ * Matches patterns like "123 Main St", "456 Oak Avenue, Austin, TX 78704"
+ */
+function looksLikeAddress(input: string): boolean {
+  const trimmed = input.trim();
+  if (!trimmed || trimmed.startsWith('http://') || trimmed.startsWith('https://')) return false;
+  // Starts with a number followed by a word (typical street address pattern)
+  return /^\d+\s+[a-zA-Z]/.test(trimmed);
+}
+
+/**
+ * Build Zillow and Redfin search URLs for a given address.
+ */
+function buildSearchUrls(address: string): { zillow: string; redfin: string } {
+  const encoded = encodeURIComponent(address.trim());
+  return {
+    zillow: `https://www.zillow.com/homes/${encoded}_rb/`,
+    redfin: `https://www.redfin.com/search#query=${encoded}`,
+  };
+}
 
 /**
  * Compute expense fields from extracted data using standard percentage-based rules.
@@ -127,11 +149,11 @@ export function UrlImport() {
 
         <div className="flex gap-2">
           <input
-            type="url"
+            type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="https://www.zillow.com/homedetails/..."
+            placeholder="Paste a Zillow or Redfin URL, or type an address..."
             disabled={status === 'loading'}
             className="flex-1 px-3 py-2 text-sm rounded-md border border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           />
@@ -151,6 +173,23 @@ export function UrlImport() {
             )}
           </button>
         </div>
+
+        {/* Address detection hint */}
+        {status === 'idle' && looksLikeAddress(url) && (() => {
+          const links = buildSearchUrls(url);
+          return (
+            <div className="mt-3 flex items-start gap-2 text-sm">
+              <Search className="w-4 h-4 text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+              <p className="text-amber-800 dark:text-amber-200">
+                That looks like an address. Search for it on{' '}
+                <a href={links.zillow} target="_blank" rel="noopener noreferrer" className="font-medium underline hover:text-amber-900 dark:hover:text-amber-100">Zillow</a>
+                {' '}or{' '}
+                <a href={links.redfin} target="_blank" rel="noopener noreferrer" className="font-medium underline hover:text-amber-900 dark:hover:text-amber-100">Redfin</a>
+                , then paste the listing URL here.
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Success feedback */}
         {status === 'success' && result && (
