@@ -53,3 +53,9 @@ test-supabase.ts
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase CLI scratch
+supabase/.temp/
+
+# Playwright MCP output
+.playwright-mcp/

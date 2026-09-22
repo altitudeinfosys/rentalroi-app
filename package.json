@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean && rm -rf node_modules",
-    "db:link:dev": "supabase link --project-ref czdenl1ortsyxuoqvalp",
+    "db:link:dev": "supabase link --project-ref czdenllortsyxuoqvalp",
     "db:link:prod": "supabase link --project-ref mgpacftgrgcyvpjguoxs",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked > packages/database/src/types.ts",

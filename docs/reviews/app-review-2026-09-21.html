@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RentalROI Review</title>
+<meta name="description" content="Ship-readiness check of feat/url-import-address-hint and improvement roadmap for the RentalROI app, 2026-09-21.">
+<style>
+  :root{--bg:#fafaf7;--fg:#1c1c1a;--muted:#5f5f5a;--line:#e3e2dc;--card:#ffffff;--accent:#1d4ed8;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--okbg:#ecfdf3;--warnbg:#fffbeb;--badbg:#fef2f2;--infobg:#eff6ff;}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33;}}
+  :root[data-theme="dark"]{--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  main{max-width:960px;margin:0 auto;padding:40px 16px 80px}
+  h1{font-size:2rem;line-height:1.2;margin:0 0 4px}
+  h2{font-size:1.35rem;margin:48px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h3{font-size:1.05rem;margin:24px 0 8px}
+  p{margin:0 0 12px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.95rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-weight:600;color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--line);padding:1px 5px;border-radius:4px}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:.85rem;line-height:1.5}
+  pre code{background:none;padding:0}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;letter-spacing:.02em}
+  .ok{background:var(--okbg);color:var(--ok)} .warn{background:var(--warnbg);color:var(--warn)} .bad{background:var(--badbg);color:var(--bad)} .info{background:var(--infobg);color:var(--accent)}
+  .callout{border-left:4px solid var(--accent);background:var(--infobg);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  .callout.bad{border-color:var(--bad);background:var(--badbg)} .callout.warn{border-color:var(--warn);background:var(--warnbg)} .callout.ok{border-color:var(--ok);background:var(--okbg)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card .k{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:1.4rem;font-weight:700;margin-top:2px}
+  svg{max-width:100%;height:auto;display:block;margin:12px auto 20px}
+  svg text{font-family:inherit;fill:var(--fg)} svg .m{fill:var(--muted)} svg .box{fill:var(--card);stroke:var(--line)} svg .flow{stroke:var(--muted);fill:none;stroke-width:1.5;marker-end:url(#arr)}
+  ol,ul{padding-left:22px} li{margin:4px 0}
+  @media print{body{background:#fff;color:#000} .card,pre{border-color:#ccc}}
+</style>
+</head>
+<body>
+<main>
+<h1>RentalROI: app review and branch ship check</h1>
+<p class="sub">Branch <code>feat/url-import-address-hint</code> · reviewed 2026-09-21 · production is <code>rentalroi.app</code>, last deployed 2026-02-15 (219 days ago)</p>
+
+<div class="callout warn">
+  <strong>Verdict.</strong> The single committed change on this branch (address detection in the URL import) is done and pushed. The real payload, about 1,100 lines of Compare, Settings and PDF-print work, is still uncommitted on disk. It builds and type-checks, but three items need a decision or a one-line fix before it is safe to publish. Details and exact commands are below.
+</div>
+
+<h2>1. Ship-readiness scorecard</h2>
+<div class="grid">
+  <div class="card"><div class="k">Type-check</div><div class="v"><span class="pill ok">pass</span></div></div>
+  <div class="card"><div class="k">Production build</div><div class="v"><span class="pill ok">pass</span></div></div>
+  <div class="card"><div class="k">Calculation tests</div><div class="v">219 / 219 <span class="pill ok">pass</span></div></div>
+  <div class="card"><div class="k">Lint</div><div class="v"><span class="pill bad">broken</span></div></div>
+</div>
+
+<table>
+<tr><th>Item</th><th>State</th><th>Blocking?</th><th>What to do</th></tr>
+<tr><td>Address hint in URL import (commit 404df24)</td><td><span class="pill ok">done, pushed</span></td><td>No</td><td>Nothing. Small, self-contained, safe.</td></tr>
+<tr><td>Compare page + selectable cards + sticky bar</td><td><span class="pill warn">uncommitted</span></td><td>Yes (route guard)</td><td>Add <code>/compare</code> to the middleware's protected routes, then commit.</td></tr>
+<tr><td>Settings page + user-settings helper</td><td><span class="pill warn">uncommitted, untested against DB</span></td><td>Yes (limit mismatch)</td><td>Pick the real free-tier limit (3 or 5) and align four places. Exercise one name save on DEV.</td></tr>
+<tr><td>Print/PDF stylesheet + Export button</td><td><span class="pill warn">uncommitted</span></td><td>No</td><td>Commit as-is.</td></tr>
+<tr><td>Lint config (<code>@repo/eslint-config</code> not a devDep of web)</td><td><span class="pill bad">broken on main too</span></td><td>No</td><td>Separate task. Fixing it will surface a backlog of lint errors.</td></tr>
+<tr><td>Stray files (5 PNGs, <code>.sync-conflict-*.DS_Store</code>, session summary md)</td><td><span class="pill warn">untracked</span></td><td>No</td><td>Delete or ignore before committing so they don't ride along.</td></tr>
+</table>
+
+<div class="callout bad">
+  <strong>Why this should ship soon.</strong> The sidebar on <code>main</code> already links to <code>/settings</code>, but the page only exists as an untracked file on this machine. A logged-in user on rentalroi.app gets a 404 from the Settings nav item today.
+</div>
+
+<h2>2. The three blockers</h2>
+
+<h3>2.1 Free-tier limit disagrees in four places</h3>
+<table>
+<tr><th>Where</th><th>Limit</th><th>Effect</th></tr>
+<tr><td>RLS insert policy on <code>calculations</code> (migration 20260126000002)</td><td><strong>3</strong></td><td>The database rejects the 4th save.</td></tr>
+<tr><td>Landing pricing section</td><td><strong>3</strong></td><td>What users are told.</td></tr>
+<tr><td><code>checkCalculationLimit()</code> in lib/supabase/calculations.ts</td><td><strong>5</strong></td><td>Client lets the user try saves 4 and 5.</td></tr>
+<tr><td>New Settings page usage meter</td><td><strong>5</strong></td><td>Shows "3 of 5 calculations" then the next save fails with an RLS error.</td></tr>
+</table>
+<p>This is a product decision. Pick one number and change the other locations. If it stays at 3, the fix is two constants in the web app. If it becomes 5, it needs a migration that rewrites the RLS policy on both DEV and PROD.</p>
+
+<h3>2.2 Settings name save has never run against real RLS</h3>
+<p>The Settings page does a client-side <code>UPDATE users</code>. Nothing in the app has done that before. The save API route uses the service role for its user upsert, so the "Users can update own profile" policy has never been exercised. Its <code>WITH CHECK</code> clause runs a sub-select on the same <code>users</code> table, a pattern that sometimes trips Postgres policy recursion. It probably works because the SELECT policy is a plain <code>auth.uid() = id</code>, but "probably" is not verified. Log in on the DEV project, change the display name once, and confirm it persists before calling Settings done.</p>
+
+<h3>2.3 <code>/compare</code> is not a protected route</h3>
+<p>The middleware guards <code>/dashboard</code>, <code>/calculations</code> and <code>/settings</code> server-side. Compare redirects client-side after the page renders, so an anonymous visitor sees a spinner and a flash before bouncing to login. One-line fix in <code>apps/web/lib/supabase/middleware.ts</code>:</p>
+<pre><code>const protectedRoutes = ['/dashboard', '/calculations', '/settings', '/compare']</code></pre>
+
+<h2>3. Compare feature: how it flows</h2>
+<svg viewBox="0 0 900 190" role="img" aria-label="Flow of the compare feature from the calculations list to the comparison view">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="fill:var(--muted)"/></marker></defs>
+  <rect class="box" x="10" y="40" width="160" height="70" rx="8"/><text x="90" y="68" text-anchor="middle" font-size="13" font-weight="600">/calculations</text><text class="m" x="90" y="88" text-anchor="middle" font-size="11">Compare toggle, pick 2 to 4</text>
+  <path class="flow" d="M170,75 L230,75"/>
+  <rect class="box" x="230" y="40" width="170" height="70" rx="8"/><text x="315" y="68" text-anchor="middle" font-size="13" font-weight="600">/compare?ids=a,b</text><text class="m" x="315" y="88" text-anchor="middle" font-size="11">client-side auth check</text>
+  <path class="flow" d="M400,75 L460,75"/>
+  <rect class="box" x="460" y="40" width="180" height="70" rx="8"/><text x="550" y="62" text-anchor="middle" font-size="13" font-weight="600">getCalculation × N</text><text class="m" x="550" y="80" text-anchor="middle" font-size="11">Supabase, RLS by user_id</text><text class="m" x="550" y="96" text-anchor="middle" font-size="11">then dbToForm()</text>
+  <path class="flow" d="M640,75 L700,75"/>
+  <rect class="box" x="700" y="40" width="190" height="70" rx="8"/><text x="795" y="62" text-anchor="middle" font-size="13" font-weight="600">ComparisonView</text><text class="m" x="795" y="80" text-anchor="middle" font-size="11">recomputes metrics client-side</text><text class="m" x="795" y="96" text-anchor="middle" font-size="11">winner highlights, 2 charts, print</text>
+  <text class="m" x="315" y="150" text-anchor="middle" font-size="11">⚠ no server-side guard (blocker 2.3)</text>
+  <text class="m" x="795" y="150" text-anchor="middle" font-size="11">⚠ Mgmt Fee row and projections ignore dollar mode</text>
+</svg>
+
+<h2>4. What the uncommitted work changes (before / after)</h2>
+<table>
+<tr><th>Area</th><th>Before (main / production)</th><th>After (this working tree)</th></tr>
+<tr><td>Sidebar</td><td>Home, Calculator, History, Settings (404)</td><td>Adds Compare; Settings resolves</td></tr>
+<tr><td>Calculations list</td><td>Grid of cards, delete only</td><td>Compare mode with checkbox cards, max 4, sticky action bar</td></tr>
+<tr><td>Compare</td><td>Route does not exist</td><td>Select view + side-by-side metrics, monthly breakdown, cash-flow and equity charts, inputs table, winner summary</td></tr>
+<tr><td>Settings</td><td>Route does not exist</td><td>Profile (editable name, email, member since) + plan badge and usage meter</td></tr>
+<tr><td>PDF export</td><td>None</td><td>Print stylesheet forcing light mode, hiding chrome, page-break helpers; "Export PDF" calls <code>window.print()</code></td></tr>
+</table>
+
+<h2>5. Improvement roadmap</h2>
+<p>Ordered by impact relative to effort. The first group are correctness issues in code that already exists.</p>
+
+<h3>5.1 Fix now (small, real bugs)</h3>
+<ul>
+  <li><strong>Property-management dollar mode is still ignored</strong> in the shared projections package and in the Compare "Mgmt Fee" row. The Jan 30 session notes already flagged the package side. Since Compare now draws a 30-year chart from those projections, the chart is wrong for any dollar-mode property. Fix in <code>packages/calculations/src/projections.ts</code> and add a test.</li>
+  <li><strong>"Upgrade to Pro" in Settings does nothing.</strong> Either link it to <code>/signup?plan=pro</code> like the pricing page or hide it until billing exists.</li>
+  <li><strong>Lint is unusable repo-wide.</strong> Add <code>"@repo/eslint-config": "workspace:*"</code> to the web app's devDependencies. Expect a backlog of warnings once it runs, so budget a cleanup pass.</li>
+  <li><strong>Declared Pro features the app does not gate.</strong> Pricing promises "30-year projections", "side-by-side comparison" and "PDF reports" as Pro-only, but Compare and PDF are available to everyone. Decide whether to gate them or reword the pricing copy.</li>
+</ul>
+
+<h3>5.2 Harden the listing import endpoint</h3>
+<p><code>POST /api/properties/extract</code> is unauthenticated, has no rate limit, and its curl fallback uses <code>execFileSync</code> with a 20-second timeout. On Vercel's Fluid Compute one slow scrape blocks the event loop for every other request sharing that instance. Also, curl's presence in the runtime image is not guaranteed, so the fallback may silently be a no-op in production.</p>
+<svg viewBox="0 0 900 150" role="img" aria-label="Extract endpoint flow">
+  <rect class="box" x="10" y="40" width="150" height="60" rx="8"/><text x="85" y="66" text-anchor="middle" font-size="13" font-weight="600">Paste URL</text><text class="m" x="85" y="84" text-anchor="middle" font-size="11">no auth required</text>
+  <path class="flow" d="M160,70 L215,70"/>
+  <rect class="box" x="215" y="40" width="160" height="60" rx="8"/><text x="295" y="66" text-anchor="middle" font-size="13" font-weight="600">validateListingUrl</text><text class="m" x="295" y="84" text-anchor="middle" font-size="11">https + zillow/redfin only ✓</text>
+  <path class="flow" d="M375,70 L430,70"/>
+  <rect class="box" x="430" y="40" width="150" height="60" rx="8"/><text x="505" y="66" text-anchor="middle" font-size="13" font-weight="600">fetch() 15s</text><text class="m" x="505" y="84" text-anchor="middle" font-size="11">async ✓</text>
+  <path class="flow" d="M580,70 L635,70"/>
+  <rect class="box" x="635" y="40" width="120" height="60" rx="8"/><text x="695" y="66" text-anchor="middle" font-size="13" font-weight="600">curl 20s</text><text class="m" x="695" y="84" text-anchor="middle" font-size="11">execFileSync ✗</text>
+  <path class="flow" d="M755,70 L810,70"/>
+  <rect class="box" x="810" y="40" width="80" height="60" rx="8"/><text x="850" y="74" text-anchor="middle" font-size="13" font-weight="600">cheerio</text>
+  <text class="m" x="450" y="135" text-anchor="middle" font-size="11">Recommended: async execFile, per-IP rate limit (Vercel Firewall rule or a small KV counter), cap to logged-in users or a daily quota</text>
+</svg>
+
+<h3>5.3 Product and growth</h3>
+<ul>
+  <li><strong>Billing.</strong> The pricing page advertises $9.99/mo Pro but there is no checkout. The schema already has RevenueCat columns and the roadmap lists Stripe. This is the single biggest gap between what the site promises and what it does.</li>
+  <li><strong>Rent estimate on import.</strong> After a Zillow/Redfin import the user still has to type rent. A Zestimate/Rentometer lookup, or even a simple 0.8 to 1 percent rule-of-thumb default, would make the import feel complete.</li>
+  <li><strong>Shared view as a lead magnet.</strong> The public <code>/s/[token]</code> page is a natural acquisition surface. Add Open Graph images and a stronger "analyze your own deal" call to action.</li>
+  <li><strong>Investment Metrics education card</strong> on the dashboard still says "Coming soon". Either write it or remove it.</li>
+  <li><strong>OAuth providers</strong> (Google, Apple) are listed as pending in TO-DOS.md. Login friction on a calculator app is a real conversion cost.</li>
+</ul>
+
+<h3>5.4 Engineering hygiene</h3>
+<ul>
+  <li><strong>step5-results.tsx is 1,246 lines</strong> and duplicates metric computation that <code>ComparisonView</code> now reimplements again. Extract a single <code>computeResults(formData)</code> helper into the calculations package so the wizard, compare, save route and shared view all agree.</li>
+  <li><strong>No CI for build/test.</strong> Only the Claude review workflow runs on PRs. Add a workflow that runs <code>pnpm type-check</code>, <code>pnpm test</code> and <code>pnpm build</code>.</li>
+  <li><strong>Integration and E2E tests</strong> remain unstarted per TO-DOS.md. The compare flow and the save/limit path are the two highest-value targets.</li>
+  <li><strong>DEV/PROD schema drift check</strong> is still manual. The tier-limit mismatch above is exactly the kind of thing an automated diff would catch.</li>
+  <li><strong>Docs are stale.</strong> NEXT-SESSION.md still describes the Phase 2 branch from January. Update or delete.</li>
+</ul>
+
+<h2>6. Suggested path to publish</h2>
+<p>Two options. Both keep this branch, since <code>main</code> is only one trivial workflow commit ahead.</p>
+<ol>
+  <li>Decide the free-tier number and align the four locations (section 2.1).</li>
+  <li>Add <code>/compare</code> to protected routes (section 2.3).</li>
+  <li>Verify one Settings name save on DEV (section 2.2).</li>
+  <li>Remove stray files, then commit in two pieces so the history stays readable:</li>
+</ol>
+<pre><code>rm -f *.png .sync-conflict-*.DS_Store
+git add apps/web/app/\(dashboard\)/compare apps/web/components/comparison \
+        apps/web/app/\(dashboard\)/calculations/page.tsx \
+        apps/web/components/dashboard/sidebar.tsx apps/web/app/globals.css
+git commit -m "feat: Side-by-side property comparison with PDF export"
+
+git add apps/web/app/\(dashboard\)/settings apps/web/lib/supabase/user-settings.ts \
+        apps/web/lib/supabase/middleware.ts
+git commit -m "feat: Settings page with profile editing and plan usage"
+
+git push
+gh pr create --base main --title "feat: Compare, Settings, PDF export, address hint"</code></pre>
+<p>Merging to <code>main</code> deploys production automatically through the Vercel git integration, so treat the PR merge as the release step. Option B is to move Compare and Settings to their own branch and merge the address hint alone first. That is cleaner history but delays the Settings 404 fix.</p>
+
+<h2>7. Evidence</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td><code>pnpm type-check</code> (apps/web)</td><td>Clean after reinstalling dependencies. The stale node_modules initially made every script fail with MODULE_NOT_FOUND.</td></tr>
+<tr><td><code>pnpm build</code> (apps/web)</td><td>Compiled, 17 routes generated. Compare 262 kB first load, Calculator 298 kB.</td></tr>
+<tr><td><code>pnpm test</code> (packages/calculations)</td><td>8 files, 219 tests, all passing.</td></tr>
+<tr><td><code>pnpm lint</code></td><td>Fails: cannot resolve <code>@repo/eslint-config/nextjs</code>.</td></tr>
+<tr><td>Branch vs origin/main</td><td>1 ahead (address hint), 1 behind (workflow permissions tweak).</td></tr>
+<tr><td>Vercel production</td><td>Deployment dpl_GVomBv32… aliased to rentalroi.app and www, created 2026-02-15.</td></tr>
+<tr><td>Secrets in git</td><td>None. Only <code>.env.example</code> files are tracked.</td></tr>
+</table>
+</main>
+</body>
+</html>
