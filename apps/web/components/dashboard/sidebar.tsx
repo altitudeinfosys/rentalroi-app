@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Calculator, History, Settings, X, PlusCircle } from 'lucide-react'
+import { Home, Calculator, History, Settings, X, PlusCircle, GitCompareArrows } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -19,6 +19,11 @@ const navItems = [
     label: 'My Calculations',
     href: '/calculations',
     icon: History,
+  },
+  {
+    label: 'Compare',
+    href: '/compare',
+    icon: GitCompareArrows,
   },
   {
     label: 'Settings',
