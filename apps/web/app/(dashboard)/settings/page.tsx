@@ -20,12 +20,6 @@ const tierColors: Record<string, string> = {
   premium: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
 }
 
-const tierLimits: Record<string, number> = {
-  free: 5,
-  pro: 50,
-  premium: Infinity,
-}
-
 export default function SettingsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
@@ -82,9 +76,6 @@ export default function SettingsPage() {
   }
 
   const tier = profile?.subscription_tier || 'free'
-  const current = profile?.calculations_this_month || 0
-  const limit = tierLimits[tier] || 5
-  const usagePercent = limit === Infinity ? 0 : Math.min((current / limit) * 100, 100)
 
   return (
     <div className="p-4 lg:p-8 max-w-4xl mx-auto">
@@ -201,7 +192,7 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Subscription</h2>
           </div>
 
-          <div className="p-5 space-y-5">
+          <div className="p-5 space-y-4">
             {/* Tier Badge */}
             <div>
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
@@ -216,40 +207,17 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            {/* Usage Progress */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Monthly Usage
-                </label>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  {current} of {limit === Infinity ? 'Unlimited' : limit} calculations
-                </span>
-              </div>
-              {limit !== Infinity && (
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                  <div
-                    className={`h-2.5 rounded-full transition-all ${
-                      usagePercent >= 90
-                        ? 'bg-red-500'
-                        : usagePercent >= 70
-                        ? 'bg-yellow-500'
-                        : 'bg-blue-600'
-                    }`}
-                    style={{ width: `${usagePercent}%` }}
-                  />
-                </div>
-              )}
+            {/* Open beta notice */}
+            <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                Open beta: everything is included
+              </p>
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Unlimited saved calculations, 30-year projections, side-by-side comparison, PDF export
+                and share links are all free while RentalROI is in beta. You&apos;ll hear from us well
+                before any paid plans arrive, and your saved calculations always stay yours.
+              </p>
             </div>
-
-            {/* Upgrade CTA for free users */}
-            {tier === 'free' && (
-              <div className="pt-2">
-                <button className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm">
-                  Upgrade to Pro
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
