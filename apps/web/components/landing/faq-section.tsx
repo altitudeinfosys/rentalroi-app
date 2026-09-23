@@ -6,7 +6,7 @@ import { Plus, Minus } from 'lucide-react'
 const faqs = [
   {
     question: 'Is RentalROI really free?',
-    answer: 'Yes. The free plan includes 3 saved calculations, 5-year projections, and shareable links. No credit card required, no trial period—it\'s free forever.',
+    answer: 'Yes. While RentalROI is in beta, every feature is free with no limits: unlimited saved calculations, 30-year projections, side-by-side comparison, PDF export, and shareable links. No credit card required.',
   },
   {
     question: 'How accurate are the calculations?',
@@ -25,8 +25,8 @@ const faqs = [
     answer: 'Monthly and annual cash flow, cap rate, cash-on-cash return, total ROI, gross rent multiplier, break-even occupancy rate, and multi-year projections including equity buildup and appreciation.',
   },
   {
-    question: 'How is Pro different from Free?',
-    answer: 'Pro unlocks unlimited saved calculations, 30-year projections (vs 5-year), side-by-side property comparison, PDF export, and priority support. It\'s built for investors who are serious about building a portfolio.',
+    question: 'Will there be a paid plan?',
+    answer: 'Eventually, yes. We plan to keep single-property analysis free and charge for portfolio-level features and paid data lookups. Beta users will get plenty of notice, and your saved calculations will always stay yours.',
   },
 ]
 

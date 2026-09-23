@@ -152,45 +152,16 @@ export async function deleteCalculation(
 }
 
 /**
- * Check if user has reached their calculation limit (for free tier)
+ * Check if user has reached their calculation limit.
+ *
+ * Open beta (2026-09): there is no cap, so this always allows creation.
+ * Kept so the call site survives when paid tiers return; see
+ * docs/product/tier-plan.html for the original Free/Pro limits.
  */
-export async function checkCalculationLimit(userId: string): Promise<{
+export async function checkCalculationLimit(_userId: string): Promise<{
   canCreate: boolean
   current: number
   limit: number
 }> {
-  const supabase = createClient()
-
-  // Get user's subscription tier and calculation count
-  const { data: user, error } = await supabase
-    .from('users')
-    .select('subscription_tier, calculations_this_month')
-    .eq('id', userId)
-    .single()
-
-  if (error) {
-    // On error, deny creation to prevent rate limit bypass
-    console.error('Error checking calculation limit:', error)
-    return { canCreate: false, current: 0, limit: 5 }
-  }
-
-  if (!user) {
-    // New user with no record yet - allow creation
-    return { canCreate: true, current: 0, limit: 5 }
-  }
-
-  const limits: Record<string, number> = {
-    free: 5,
-    pro: 50,
-    premium: Infinity,
-  }
-
-  const limit = limits[user.subscription_tier] || 5
-  const current = user.calculations_this_month || 0
-
-  return {
-    canCreate: current < limit,
-    current,
-    limit,
-  }
+  return { canCreate: true, current: 0, limit: Infinity }
 }
