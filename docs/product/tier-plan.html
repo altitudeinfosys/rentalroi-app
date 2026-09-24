@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RentalROI Tier Plan</title>
+<meta name="description" content="Record of RentalROI's original Free/Pro tiers, what was actually enforced, the open-beta decision of 2026-09-22, and the plan for reintroducing a paid tier.">
+<style>
+  :root{--bg:#fafaf7;--fg:#1c1c1a;--muted:#5f5f5a;--line:#e3e2dc;--card:#fff;--accent:#1d4ed8;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--okbg:#ecfdf3;--warnbg:#fffbeb;--badbg:#fef2f2;--infobg:#eff6ff}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33}}
+  :root[data-theme="dark"]{--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  main{max-width:920px;margin:0 auto;padding:40px 16px 80px}
+  h1{font-size:2rem;line-height:1.2;margin:0 0 4px} h2{font-size:1.3rem;margin:44px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)} h3{font-size:1.05rem;margin:22px 0 8px}
+  p{margin:0 0 12px} .sub{color:var(--muted);margin-bottom:28px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.95rem} th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top} th{font-weight:600;color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--line);padding:1px 5px;border-radius:4px}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font-size:.85rem;line-height:1.5} pre code{background:none;padding:0}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600} .ok{background:var(--okbg);color:var(--ok)} .warn{background:var(--warnbg);color:var(--warn)} .bad{background:var(--badbg);color:var(--bad)} .info{background:var(--infobg);color:var(--accent)}
+  .callout{border-left:4px solid var(--accent);background:var(--infobg);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  svg{max-width:100%;height:auto;display:block;margin:12px auto 20px} svg text{font-family:inherit;fill:var(--fg)} svg .m{fill:var(--muted)} svg .box{fill:var(--card);stroke:var(--line)} svg .flow{stroke:var(--muted);fill:none;stroke-width:1.5;marker-end:url(#arr)} svg .hi{stroke:var(--accent);stroke-width:2}
+  ul,ol{padding-left:22px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>RentalROI tier plan</h1>
+<p class="sub">Record of the original Free/Pro split, what the code actually enforced, the open-beta decision, and how a paid tier comes back. Decided 2026-09-22.</p>
+
+<div class="callout">
+  <strong>Current state: open beta, everything free.</strong> No caps are enforced anywhere. The tier columns, functions and counters stay in the database so a paid plan can be switched on later without a schema redesign.
+</div>
+
+<h2>1. Timeline</h2>
+<svg viewBox="0 0 900 130" role="img" aria-label="Timeline from original tiers to open beta to future paid tier">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+  <rect class="box" x="10" y="30" width="250" height="70" rx="8"/><text x="135" y="56" text-anchor="middle" font-size="13" font-weight="600">Jan 2026: Free / Pro designed</text><text class="m" x="135" y="76" text-anchor="middle" font-size="11">3 saves/mo cap enforced in RLS</text>
+  <path class="flow" d="M260,65 L320,65"/>
+  <rect class="box hi" x="320" y="30" width="250" height="70" rx="8"/><text x="445" y="56" text-anchor="middle" font-size="13" font-weight="600">Sep 2026: Open beta</text><text class="m" x="445" y="76" text-anchor="middle" font-size="11">all caps removed, single free plan</text>
+  <path class="flow" d="M570,65 L630,65"/>
+  <rect class="box" x="630" y="30" width="260" height="70" rx="8" stroke-dasharray="5 4"/><text x="760" y="56" text-anchor="middle" font-size="13" font-weight="600">Later: Paid tier + Stripe</text><text class="m" x="760" y="76" text-anchor="middle" font-size="11">after the free product is verified working</text>
+</svg>
+
+<h2>2. The original tiers (as designed, January 2026)</h2>
+<table>
+<tr><th>Feature</th><th>Free ($0)</th><th>Pro ($9.99/mo)</th><th>Was it actually enforced?</th></tr>
+<tr><td>Saved calculations</td><td>3 per month</td><td>Unlimited</td><td><span class="pill ok">yes</span> RLS insert policy on <code>calculations</code></td></tr>
+<tr><td>Projection length</td><td>5 years</td><td>30 years</td><td><span class="pill bad">no</span> everyone got the full projection</td></tr>
+<tr><td>Side-by-side comparison</td><td>—</td><td>Included</td><td><span class="pill bad">no</span> open to all once built</td></tr>
+<tr><td>PDF export</td><td>—</td><td>Included</td><td><span class="pill bad">no</span> open to all once built</td></tr>
+<tr><td>Share links</td><td>Must expire within 7 days</td><td>Never expire</td><td><span class="pill warn">bypassed</span> API used the service role and issued 30-day links to everyone</td></tr>
+<tr><td>Saved projections table</td><td>—</td><td>Pro only</td><td><span class="pill warn">moot</span> table unused by the app</td></tr>
+<tr><td>Advanced analytics, priority support</td><td>—</td><td>Included</td><td><span class="pill bad">did not exist</span></td></tr>
+</table>
+<p>Client-side code also disagreed with the database: the limit check and the Settings usage meter said 5 per month, while RLS and the pricing page said 3. That mismatch was one reason to simplify.</p>
+
+<h2>3. What "open beta" changed (2026-09-22)</h2>
+<table>
+<tr><th>Layer</th><th>Change</th><th>Where</th></tr>
+<tr><td>Database</td><td>Replaced the tier-gated insert policies on <code>calculations</code>, <code>shared_links</code> and <code>projections</code> with plain ownership checks</td><td><code>supabase/migrations/20260922000001_open_beta_remove_tier_caps.sql</code></td></tr>
+<tr><td>Client limit check</td><td><code>checkCalculationLimit()</code> now always allows creation</td><td><code>apps/web/lib/supabase/calculations.ts</code></td></tr>
+<tr><td>Landing page</td><td>Single "Free while in beta" plan card, FAQ reworded</td><td><code>components/landing/pricing-section.tsx</code>, <code>faq-section.tsx</code></td></tr>
+<tr><td>Settings</td><td>Usage meter and "Upgrade to Pro" replaced with an open-beta notice</td><td><code>app/(dashboard)/settings/page.tsx</code></td></tr>
+</table>
+
+<h3>What was deliberately kept</h3>
+<ul>
+  <li><code>users.subscription_tier</code> enum column (free / pro / premium) and the RevenueCat columns.</li>
+  <li><code>get_user_tier()</code> and <code>get_calculations_this_month()</code> SQL functions.</li>
+  <li>The trigger that increments <code>calculations_this_month</code> on every save and resets it monthly. Usage keeps being counted even though nothing reads it, which gives real numbers to set future limits from.</li>
+  <li>The "Service role can manage users" policy, which is how a billing webhook will set the tier.</li>
+</ul>
+
+<h2>4. Plan for bringing a paid tier back</h2>
+<p>Principle: keep single-property analysis free forever. Charge for portfolio scale and for anything that costs money per use.</p>
+<table>
+<tr><th>Feature</th><th>Free (proposed)</th><th>Pro (proposed)</th><th>Enforcement point</th></tr>
+<tr><td>Saved calculations</td><td>Generous cap, set from beta usage data (e.g. 25 total)</td><td>Unlimited</td><td>Restore RLS insert policy with the new number</td></tr>
+<tr><td>Compare</td><td>Up to 2 properties</td><td>Up to 4, saved comparisons</td><td>Compare page + a <code>comparisons</code> table with RLS</td></tr>
+<tr><td>Listing import (Zillow/Redfin)</td><td>A few per day</td><td>Higher quota</td><td>Rate limit in <code>/api/properties/extract</code> keyed by user</td></tr>
+<tr><td>Rent estimates, neighborhood data</td><td>—</td><td>Included</td><td>Only Pro calls the paid provider</td></tr>
+<tr><td>PDF export, share links, 30-year projections</td><td>Included</td><td>Included</td><td>None. These are cheap and drive word of mouth.</td></tr>
+</table>
+
+<h3>Implementation order when the time comes</h3>
+<ol>
+  <li>Stripe Checkout + Customer Portal, one Pro price. Webhook writes <code>subscription_tier</code> and <code>subscription_expires_at</code> via the service role.</li>
+  <li>Migration restoring tier checks in RLS with the chosen numbers.</li>
+  <li>Bring back the two-card pricing section and the Settings usage meter, reading limits from one shared constant so the client, pricing copy and database can't drift again.</li>
+  <li>Grandfather beta users: everything they saved stays readable regardless of tier.</li>
+</ol>
+
+<h2>5. How to restore the old policies</h2>
+<p>The original policy definitions are in <code>supabase/migrations/20260126000002_rls_policies.sql</code> (lines 131 to 147 for calculations, 179 to 191 for projections, 238 to 256 for shared links). A future migration should drop the open-beta policies by name and recreate those with updated numbers:</p>
+<pre><code>DROP POLICY IF EXISTS "Users can create own calculations" ON calculations;
+CREATE POLICY "Tier enforcement for calculation creation" ON calculations
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id AND (
+      get_user_tier() IN ('pro', 'premium')
+      OR (get_user_tier() = 'free' AND get_calculations_this_month() &lt; &lt;new limit&gt;)
+    )
+  );</code></pre>
+</main>
+</body>
+</html>
