@@ -25,3 +25,84 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* Print styles for PDF export */
+@media print {
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+
+  /* Force light mode */
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide non-print elements */
+  aside,
+  nav,
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show print-only elements */
+  .print-visible {
+    display: block !important;
+  }
+
+  /* Full-width content */
+  main,
+  .print-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* SVG charts auto-sized */
+  .recharts-responsive-container {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 250px;
+  }
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Page break utilities */
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Clean up card styles for print */
+  .dark\:bg-gray-800 {
+    background: white !important;
+  }
+
+  .dark\:text-white,
+  .dark\:text-gray-100,
+  .dark\:text-gray-200,
+  .dark\:text-gray-300 {
+    color: black !important;
+  }
+
+  .dark\:text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  .dark\:border-gray-700 {
+    border-color: #e5e7eb !important;
+  }
+}
