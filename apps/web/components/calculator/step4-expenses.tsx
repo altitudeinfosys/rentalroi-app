@@ -170,7 +170,7 @@ export function Step4Expenses() {
             percentFieldName="propertyManagementPercent"
             modeFieldName="propertyManagementMode"
             label="Property Management Fee"
-            percentBaseValue={grossMonthlyIncome || 0}
+            percentBaseValue={(grossMonthlyIncome || 0) * 12}
             percentBaseLabel="of rent"
             dollarPlaceholder="0"
             percentPlaceholder="8"

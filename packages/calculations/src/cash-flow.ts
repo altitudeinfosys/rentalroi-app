@@ -73,10 +73,12 @@ export function calculateCashFlow(
   monthlyRent: number,
   vacancyRate: number,
   monthlyOperatingExpenses: number,
-  monthlyMortgagePayment: number
+  monthlyMortgagePayment: number,
+  otherMonthlyIncome: number = 0
 ): CashFlowBreakdown {
-  // Calculate income after vacancy
-  const grossIncome = monthlyRent;
+  // Calculate income after vacancy. Vacancy applies to rent only;
+  // other income (parking, laundry, etc.) is added as-is.
+  const grossIncome = monthlyRent + otherMonthlyIncome;
   const vacancyLoss = (monthlyRent * vacancyRate) / 100;
   const netIncome = grossIncome - vacancyLoss;
 

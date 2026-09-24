@@ -96,8 +96,12 @@ export function calculateMultiYearProjection(
     const utilities = inputs.utilitiesMonthly * 12 * expenseMultiplier;
     const otherExpenses = inputs.otherExpensesMonthly * 12 * expenseMultiplier;
 
-    // Management fee is based on current gross rent (after rent increases)
-    const management = (grossAnnualIncome * inputs.propertyManagementPercent) / 100;
+    // Management fee: percent of current gross rent (after rent increases),
+    // or a fixed monthly amount that grows with other expenses in dollar mode.
+    const management =
+      inputs.propertyManagementMode === 'dollar'
+        ? (inputs.propertyManagementMonthly || 0) * 12 * expenseMultiplier
+        : (grossAnnualIncome * inputs.propertyManagementPercent) / 100;
 
     const totalExpenses =
       propertyTax + insurance + hoa + maintenance + management + utilities + otherExpenses;

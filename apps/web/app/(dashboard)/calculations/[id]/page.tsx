@@ -265,7 +265,9 @@ export default async function CalculationViewPage({
             <div className="flex justify-between">
               <dt className="text-gray-600 dark:text-gray-400">Property Management</dt>
               <dd className="font-medium text-gray-900 dark:text-white">
-                {calculation.property_management_percent}%
+                {calculation.property_management_mode === 'dollar'
+                  ? `${formatCurrency(calculation.property_management_monthly ?? 0)}/mo`
+                  : `${calculation.property_management_percent}%`}
               </dd>
             </div>
           </dl>

@@ -133,18 +133,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </nav>
 
-        {/* Upgrade banner (for free users) */}
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-4 text-white">
-            <p className="font-semibold text-sm mb-1">Upgrade to Pro</p>
-            <p className="text-xs text-blue-100 mb-3">
-              Unlock unlimited calculations and advanced features
-            </p>
-            <button className="w-full py-2 bg-white text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors">
-              Learn More
-            </button>
-          </div>
-        </div>
       </aside>
     </>
   )

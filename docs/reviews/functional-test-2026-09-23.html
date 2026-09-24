@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RentalROI QA Pass</title>
+<meta name="description" content="Functional test pass of RentalROI against the DEV database on 2026-09-23: every user flow exercised, bugs found, fixes applied.">
+<style>
+  :root{--bg:#fafaf7;--fg:#1c1c1a;--muted:#5f5f5a;--line:#e3e2dc;--card:#fff;--accent:#1d4ed8;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--okbg:#ecfdf3;--warnbg:#fffbeb;--badbg:#fef2f2;--infobg:#eff6ff}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33}}
+  :root[data-theme="dark"]{--bg:#141413;--fg:#ecebe6;--muted:#a3a29b;--line:#2c2c29;--card:#1d1d1b;--accent:#7ea4ff;--okbg:#0f2a19;--warnbg:#2f2208;--badbg:#2f1212;--infobg:#0f1c33}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  main{max-width:960px;margin:0 auto;padding:40px 16px 80px}
+  h1{font-size:2rem;line-height:1.2;margin:0 0 4px} h2{font-size:1.3rem;margin:44px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)} h3{font-size:1.05rem;margin:22px 0 8px}
+  p{margin:0 0 12px} .sub{color:var(--muted);margin-bottom:28px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.95rem} th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top} th{font-weight:600;color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--line);padding:1px 5px;border-radius:4px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap} .ok{background:var(--okbg);color:var(--ok)} .warn{background:var(--warnbg);color:var(--warn)} .bad{background:var(--badbg);color:var(--bad)} .info{background:var(--infobg);color:var(--accent)}
+  .callout{border-left:4px solid var(--accent);background:var(--infobg);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0} .callout.ok{border-color:var(--ok);background:var(--okbg)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0 20px} .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px} .card .k{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em} .card .v{font-size:1.5rem;font-weight:700;margin-top:2px}
+  figure{margin:16px 0 24px} figure img{width:100%;border:1px solid var(--line);border-radius:8px;display:block} figcaption{font-size:.85rem;color:var(--muted);margin-top:6px}
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  svg{max-width:100%;height:auto;display:block;margin:12px auto 20px} svg text{font-family:inherit;fill:var(--fg)} svg .m{fill:var(--muted)} svg .box{fill:var(--card);stroke:var(--line)} svg .flow{stroke:var(--muted);fill:none;stroke-width:1.5;marker-end:url(#arr)} svg .okb{stroke:var(--ok);stroke-width:2} svg .badb{stroke:var(--bad);stroke-width:2}
+  ul,ol{padding-left:22px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>RentalROI functional test pass</h1>
+<p class="sub">Run 2026-09-23 against the DEV Supabase project from a local dev server, driven by Playwright. QA account <code>qa-openbeta@rentalroi.test</code>. Screenshots in <code>docs/reviews/qa-2026-09-23/</code>.</p>
+
+<div class="callout ok">
+  <strong>Outcome.</strong> Every core flow works end to end: login, wizard, save past the old 3-per-month cap, list, compare, share, settings, delete. Two real bugs were found and fixed during the pass (a database policy that blocked every profile edit, and a management-fee calculation that produced nonsense percentages), plus three smaller correctness issues. All fixes are in the repo and, for the database, already applied to DEV and PROD.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="k">Flows exercised</div><div class="v">11</div></div>
+  <div class="card"><div class="k">Passed as-is</div><div class="v">8</div></div>
+  <div class="card"><div class="k">Bugs found</div><div class="v">6</div></div>
+  <div class="card"><div class="k">Fixed this pass</div><div class="v">6</div></div>
+</div>
+
+<h2>1. Flow results</h2>
+<table>
+<tr><th>#</th><th>Flow</th><th>Result</th><th>Notes</th></tr>
+<tr><td>1</td><td>Login with email + password</td><td><span class="pill ok">pass</span></td><td>Lands on /dashboard. Header shows initials and name.</td></tr>
+<tr><td>2</td><td>Address hint in listing import</td><td><span class="pill ok">pass</span></td><td>Typing a street address shows Zillow and Redfin search links with the address URL-encoded.</td></tr>
+<tr><td>3</td><td>Listing import error path</td><td><span class="pill ok">pass</span></td><td>A non-listing Zillow URL returns a friendly message and leaves the form usable.</td></tr>
+<tr><td>4</td><td>Wizard steps 1 to 5</td><td><span class="pill warn">pass with bugs</span></td><td>Validation and navigation fine. Results ignored other income and produced a bogus management percent (bugs B2, B3 below).</td></tr>
+<tr><td>5</td><td>Save, then 3 more saves (4 total on a free account)</td><td><span class="pill ok">pass</span></td><td>All four inserts succeeded. Usage counter reads 4. The old 3-per-month RLS cap is confirmed gone.</td></tr>
+<tr><td>6</td><td>Calculations list + compare mode</td><td><span class="pill ok">pass</span></td><td>Toggle, checkbox cards, 4-max limit, sticky bar, navigation to /compare?ids=.</td></tr>
+<tr><td>7</td><td>Comparison view (3 properties)</td><td><span class="pill warn">pass with bugs</span></td><td>All sections render, winner highlights work. Management row showed 54.55% for a $150/mo property (B3).</td></tr>
+<tr><td>8</td><td>PDF export</td><td><span class="pill ok">pass</span></td><td>Button present, print stylesheet loaded. The print dialog itself is not automatable, so it was not clicked.</td></tr>
+<tr><td>9</td><td>Edit saved calculation, create share link, open public page</td><td><span class="pill ok">pass</span></td><td>Edit prefills all fields. Share copies a 30-day link. Public /s/ page renders with no server errors.</td></tr>
+<tr><td>10</td><td>Settings: edit display name</td><td><span class="pill bad">fail, then fixed</span></td><td>Database rejected the update (B1). After the policy fix, the save persists and a tier escalation attempt is still refused.</td></tr>
+<tr><td>11</td><td>Delete a calculation</td><td><span class="pill ok">pass</span></td><td>Confirmation dialog, card removed, count decremented.</td></tr>
+</table>
+
+<h2>2. Bugs found and fixed</h2>
+
+<h3>B1. Profile edits were impossible for every real user <span class="pill bad">high</span></h3>
+<p>The "Users can update own profile" policy compared <code>subscription_expires_at</code> with <code>=</code> against the existing row. That column is NULL for everyone who hasn't paid, and in SQL <code>NULL = NULL</code> is not true, so the WITH CHECK never passed. Every client-side update to the users table failed with "new row violates row-level security policy". The Settings page also swallowed the error and stayed in edit mode.</p>
+<svg viewBox="0 0 900 120" role="img" aria-label="Before and after of the users update policy">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+  <rect class="box badb" x="10" y="20" width="400" height="80" rx="8"/><text x="210" y="46" text-anchor="middle" font-size="13" font-weight="600">Before</text><text class="m" x="210" y="66" text-anchor="middle" font-size="12">subscription_expires_at = (SELECT …)</text><text class="m" x="210" y="84" text-anchor="middle" font-size="12">NULL = NULL → NULL → update rejected</text>
+  <path class="flow" d="M410,60 L480,60"/>
+  <rect class="box okb" x="480" y="20" width="410" height="80" rx="8"/><text x="685" y="46" text-anchor="middle" font-size="13" font-weight="600">After (migration 20260923000001)</text><text class="m" x="685" y="66" text-anchor="middle" font-size="12">subscription_expires_at IS NOT DISTINCT FROM (SELECT …)</text><text class="m" x="685" y="84" text-anchor="middle" font-size="12">NULL vs NULL → true → name saves; tier change still 403</text>
+</svg>
+<p>Fix: migration <code>20260923000001_fix_users_update_policy_null_expiry.sql</code>, applied to DEV and PROD. Settings now shows the error text under the field if a save fails.</p>
+
+<h3>B2. Results ignored "Other Monthly Income" <span class="pill warn">medium</span></h3>
+<p>The Expenses-step preview counted the $100 other income (cash flow −$134) but the Results step, Compare and the shared page did not (−$234). <code>calculateCashFlow()</code> in the calculations package now takes an optional other-income argument that is added to gross income without vacancy, and all three callers pass it. Two unit tests added.</p>
+
+<h3>B3. Dollar-mode management fee produced a nonsense percent <span class="pill warn">medium</span></h3>
+<p>Entering a fixed $150/mo fee stored <code>propertyManagementPercent = 54.55</code>. The toggle field annualised the dollar amount but divided by a <em>monthly</em> base. That bogus percent then leaked into the detail page, the shared page, the Compare row and the multi-year projections. Fixes:</p>
+<ul>
+  <li>Wizard now computes the percent against annual gross income (4.55% for the same input).</li>
+  <li>Projections honour dollar mode and grow the fixed fee with the expense-increase rate. Two unit tests added.</li>
+  <li>Detail, shared and Compare views display "$150/mo" when the mode is dollar instead of the percent.</li>
+  <li>The shared page's own cash-flow computation is now mode-aware.</li>
+</ul>
+<p>Rows saved before this fix keep the bogus percent in the database. Re-saving from the wizard corrects them. Only the QA rows on DEV are affected today.</p>
+
+<h3>B4. "Upgrade to Pro" banner still in the sidebar <span class="pill info">low</span></h3>
+<p>Missed in the open-beta cleanup. Removed.</p>
+
+<h3>B5. Settings save failed silently <span class="pill info">low</span></h3>
+<p>Covered with B1: an error line now appears under the name field.</p>
+
+<h3>B6. Utilities missing from the Results expense list <span class="pill info">low, not fixed</span></h3>
+<p>The First Year tab lists tax, insurance, maintenance and management but not utilities or other expenses, while "Total Operating" includes them. Numbers are right, the itemisation is incomplete. Left for a later UI pass.</p>
+
+<h2>3. Observations, not bugs</h2>
+<ul>
+  <li>The header always says "Dashboard" regardless of page. Cosmetic.</li>
+  <li>Gross rent renders as "$3200.00" without a thousands separator on the Results tab.</li>
+  <li>The "Complete" button on the Results step is permanently disabled and has no visible purpose.</li>
+  <li>A share link's view count starts at 1 before anyone opens it.</li>
+  <li>The "Debug: Form Values" panel under the calculator is development-only and does not ship.</li>
+  <li>The Compare "Mgmt Fee" cell renders "$150/Mo" because the column uses CSS capitalize.</li>
+</ul>
+
+<h2>4. Screenshots</h2>
+<div class="shots">
+  <figure><img src="qa-2026-09-23/02-address-hint.png" alt="Address hint under the import box"><figcaption>Address detection with Zillow and Redfin links.</figcaption></figure>
+  <figure><img src="qa-2026-09-23/04-results-step5.png" alt="Results step"><figcaption>Results step before the other-income fix (−$234).</figcaption></figure>
+  <figure><img src="qa-2026-09-23/06-compare-select.png" alt="Compare selection"><figcaption>Compare mode on the list with three selected.</figcaption></figure>
+  <figure><img src="qa-2026-09-23/07-compare-view.png" alt="Comparison view"><figcaption>Full comparison view, three properties.</figcaption></figure>
+  <figure><img src="qa-2026-09-23/08-shared-view.png" alt="Public shared page"><figcaption>Public share page.</figcaption></figure>
+  <figure><img src="qa-2026-09-23/09-settings.png" alt="Settings page"><figcaption>Settings with the open-beta notice.</figcaption></figure>
+</div>
+
+<h2>5. Verification after fixes</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Settings name save (browser)</td><td>Persists, exits edit mode, no error.</td></tr>
+<tr><td>REST update of <code>subscription_tier</code> as the user</td><td>HTTP 403. Tier fields remain locked.</td></tr>
+<tr><td>Compare row for property A</td><td>Monthly Cash Flow −$134 (matches preview), Mgmt Fee "$150/mo".</td></tr>
+<tr><td>Calculation unit tests</td><td>223 passing (219 existing + 4 new).</td></tr>
+<tr><td><code>pnpm type-check</code></td><td>Clean.</td></tr>
+</table>
+
+<h2>6. Not covered</h2>
+<ul>
+  <li>Sign-up with email confirmation and password reset (needs a real mailbox; the QA user was created via the admin API).</li>
+  <li>A live Zillow or Redfin import (depends on those sites not blocking the request at test time).</li>
+  <li>The print dialog itself.</li>
+  <li>Mobile viewport.</li>
+</ul>
+</main>
+</body>
+</html>

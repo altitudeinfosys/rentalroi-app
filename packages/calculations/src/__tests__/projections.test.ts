@@ -464,3 +464,36 @@ describe('calculateMultiYearProjection', () => {
     });
   });
 });
+
+describe('Property management in dollar mode', () => {
+  it('uses the fixed monthly fee instead of the percent when mode is dollar', () => {
+    const percentInputs = { ...baseInputs, propertyManagementPercent: 8 };
+    const dollarInputs = {
+      ...baseInputs,
+      propertyManagementMode: 'dollar' as const,
+      propertyManagementMonthly: 150,
+      propertyManagementPercent: 54.55, // stale/bogus value must be ignored
+    };
+    const percentYear1 = calculateMultiYearProjection(percentInputs)[0];
+    const dollarYear1 = calculateMultiYearProjection(dollarInputs)[0];
+
+    // Percent mode: 8% of $42,000 gross = $3,360. Dollar mode: $150 x 12 = $1,800.
+    expect(percentYear1.totalExpenses - dollarYear1.totalExpenses).toBeCloseTo(3360 - 1800, 2);
+  });
+
+  it('grows the fixed fee with the expense increase rate, not the rent increase', () => {
+    const inputs = {
+      ...baseInputs,
+      propertyManagementMode: 'dollar' as const,
+      propertyManagementMonthly: 100,
+      annualExpenseIncrease: 10,
+      annualRentIncrease: 0,
+      propertyTaxAnnual: 0,
+      insuranceAnnual: 0,
+      maintenanceMonthly: 0,
+    };
+    const [y1, y2] = calculateMultiYearProjection(inputs);
+    expect(y1.totalExpenses).toBeCloseTo(1200, 2);
+    expect(y2.totalExpenses).toBeCloseTo(1320, 2);
+  });
+});
