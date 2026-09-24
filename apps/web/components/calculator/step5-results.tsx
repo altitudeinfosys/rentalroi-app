@@ -47,6 +47,9 @@ const TABS: Tab[] = [
  *
  * Displays comprehensive calculation results across 4 tabs
  */
+/** Money with cents and thousands separators, e.g. 3,200.00 */
+const money = (v: number) => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export function Step5Results() {
   const [activeTab, setActiveTab] = useState<TabId>('first-year');
   const { watch } = useFormContext<CalculationInputs>();
@@ -389,13 +392,21 @@ function Tab1FirstYear({
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-400">Gross Rent</span>
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                ${results.cashFlow.grossIncome.toFixed(2)}
+                ${money(values.monthlyRent)}
               </span>
             </div>
+            {values.otherMonthlyIncome > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Other Income</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  ${money(values.otherMonthlyIncome)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center text-red-600 dark:text-red-400">
               <span className="text-sm">Vacancy Loss ({values.vacancyRate}%)</span>
               <span className="text-sm font-semibold">
-                -${results.cashFlow.vacancyLoss.toFixed(2)}
+                -${money(results.cashFlow.vacancyLoss)}
               </span>
             </div>
             <div className="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -403,7 +414,7 @@ function Tab1FirstYear({
                 Net Income
               </span>
               <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                ${results.cashFlow.netIncome.toFixed(2)}
+                ${money(results.cashFlow.netIncome)}
               </span>
             </div>
           </div>
@@ -418,27 +429,27 @@ function Tab1FirstYear({
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-400">Property Tax</span>
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                ${(values.propertyTaxAnnual / 12).toFixed(2)}
+                ${money((values.propertyTaxAnnual / 12))}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-400">Insurance</span>
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                ${(values.insuranceAnnual / 12).toFixed(2)}
+                ${money((values.insuranceAnnual / 12))}
               </span>
             </div>
             {values.hoaMonthly > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">HOA Fees</span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${values.hoaMonthly.toFixed(2)}
+                  ${money(values.hoaMonthly)}
                 </span>
               </div>
             )}
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-400">Maintenance</span>
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                ${values.maintenanceMonthly.toFixed(2)}
+                ${money(values.maintenanceMonthly)}
               </span>
             </div>
             {((values as any).propertyManagementMonthly > 0 || values.propertyManagementPercent > 0) && (
@@ -447,10 +458,26 @@ function Tab1FirstYear({
                   Property Management
                 </span>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  ${((values as any).propertyManagementMode === 'dollar'
+                  ${money(((values as any).propertyManagementMode === 'dollar'
                     ? ((values as any).propertyManagementMonthly || 0)
                     : (values.monthlyRent * values.propertyManagementPercent / 100)
-                  ).toFixed(2)}
+                  ))}
+                </span>
+              </div>
+            )}
+            {values.utilitiesMonthly > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Utilities</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  ${money(values.utilitiesMonthly)}
+                </span>
+              </div>
+            )}
+            {values.otherExpensesMonthly > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Other Expenses</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  ${money(values.otherExpensesMonthly)}
                 </span>
               </div>
             )}
@@ -459,7 +486,7 @@ function Tab1FirstYear({
                 Total Operating
               </span>
               <span className="text-sm font-bold text-red-600 dark:text-red-400">
-                ${results.monthlyOperatingExpenses.toFixed(2)}
+                ${money(results.monthlyOperatingExpenses)}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -467,7 +494,7 @@ function Tab1FirstYear({
                 Mortgage Payment
               </span>
               <span className="text-sm font-bold text-red-600 dark:text-red-400">
-                ${results.monthlyPayment.toFixed(2)}
+                ${money(results.monthlyPayment)}
               </span>
             </div>
           </div>
@@ -688,19 +715,19 @@ function Tab3Metrics({ values, results }: { values: CalculationInputs; results: 
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Monthly</span>
                 <span className={`text-lg font-bold ${results.cashFlow.cashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  ${results.cashFlow.cashFlow.toFixed(2)}
+                  ${money(results.cashFlow.cashFlow)}
                 </span>
               </div>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Annual</span>
                 <span className={`text-lg font-bold ${results.cashFlow.cashFlow * 12 >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  ${(results.cashFlow.cashFlow * 12).toFixed(2)}
+                  ${money((results.cashFlow.cashFlow * 12))}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">{values.holdingLength}-Year Total</span>
                 <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  ${results.totalReturn.totalCashFlow.toFixed(2)}
+                  ${money(results.totalReturn.totalCashFlow)}
                 </span>
               </div>
             </div>
@@ -781,7 +808,7 @@ function Tab3Metrics({ values, results }: { values: CalculationInputs; results: 
               Monthly Rent Needed to Break Even
             </p>
             <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-              ${(results.monthlyOperatingExpenses + results.monthlyPayment).toFixed(2)}
+              ${money((results.monthlyOperatingExpenses + results.monthlyPayment))}
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               Operating expenses + mortgage payment
@@ -792,7 +819,7 @@ function Tab3Metrics({ values, results }: { values: CalculationInputs; results: 
               Current Monthly Margin
             </p>
             <p className={`text-2xl font-bold ${results.cashFlow.cashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              ${results.cashFlow.cashFlow.toFixed(2)}
+              ${money(results.cashFlow.cashFlow)}
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               {results.cashFlow.cashFlow >= 0

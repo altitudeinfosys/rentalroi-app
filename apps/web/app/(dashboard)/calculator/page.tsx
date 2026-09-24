@@ -500,14 +500,15 @@ function CalculatorContent() {
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={currentStep === 5}
-                  className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {currentStep === 5 ? 'Complete' : 'Next →'}
-                </button>
+                {currentStep < 5 && (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Next →
+                  </button>
+                )}
               </div>
             </div>
           </form>

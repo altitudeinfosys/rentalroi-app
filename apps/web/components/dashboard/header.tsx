@@ -1,6 +1,7 @@
 'use client'
 
 import { Menu } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { UserMenu } from './user-menu'
 import type { User } from '@supabase/supabase-js'
@@ -10,7 +11,18 @@ interface HeaderProps {
   onMenuClick: () => void
 }
 
+const pageTitles: { prefix: string; title: string }[] = [
+  { prefix: '/dashboard', title: 'Dashboard' },
+  { prefix: '/calculator', title: 'Calculator' },
+  { prefix: '/calculations', title: 'My Calculations' },
+  { prefix: '/compare', title: 'Compare' },
+  { prefix: '/settings', title: 'Settings' },
+]
+
 export function Header({ user, onMenuClick }: HeaderProps) {
+  const pathname = usePathname()
+  const title = pageTitles.find((p) => pathname?.startsWith(p.prefix))?.title ?? 'RentalROI'
+
   return (
     <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6">
       {/* Left side - menu button (mobile) and title */}
@@ -23,7 +35,7 @@ export function Header({ user, onMenuClick }: HeaderProps) {
           <Menu className="w-6 h-6" />
         </button>
         <h1 className="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">
-          Dashboard
+          {title}
         </h1>
       </div>
 

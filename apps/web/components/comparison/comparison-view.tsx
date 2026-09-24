@@ -207,7 +207,7 @@ export function ComparisonView({ properties, onBack }: ComparisonViewProps) {
     {
       category: 'Property Details',
       rows: [
-        { label: 'Type', values: computed.map((p) => p.formData.propertyType.replace('_', ' ')) },
+        { label: 'Type', values: computed.map((p) => p.formData.propertyType.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())) },
         { label: 'Address', values: computed.map((p) => [p.formData.address, p.formData.city, p.formData.state].filter(Boolean).join(', ') || 'N/A') },
         { label: 'Bedrooms', values: computed.map((p) => p.formData.bedrooms?.toString() || 'N/A') },
         { label: 'Bathrooms', values: computed.map((p) => p.formData.bathrooms?.toString() || 'N/A') },
@@ -381,7 +381,7 @@ export function ComparisonView({ properties, onBack }: ComparisonViewProps) {
                   </div>
                   <div className={`grid ${gridCols} divide-x divide-gray-100 dark:divide-gray-700`}>
                     {row.values.map((v, i) => (
-                      <div key={i} className="px-4 py-2.5 text-sm text-center text-gray-900 dark:text-white capitalize">
+                      <div key={i} className="px-4 py-2.5 text-sm text-center text-gray-900 dark:text-white">
                         {v}
                       </div>
                     ))}
