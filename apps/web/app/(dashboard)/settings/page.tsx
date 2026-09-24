@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [isEditingName, setIsEditingName] = useState(false)
   const [editName, setEditName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Load user and profile
   useEffect(() => {
@@ -54,15 +55,19 @@ export default function SettingsPage() {
     if (!user || !profile) return
     setIsSaving(true)
 
+    setSaveError(null)
     const result = await updateUserProfile(user.id, { full_name: editName.trim() })
     if (result.success) {
       setProfile({ ...profile, full_name: editName.trim() })
       setIsEditingName(false)
+    } else {
+      setSaveError(result.error || 'Could not save your name. Please try again.')
     }
     setIsSaving(false)
   }
 
   const handleCancelEdit = () => {
+    setSaveError(null)
     setEditName(profile?.full_name || '')
     setIsEditingName(false)
   }
@@ -152,6 +157,11 @@ export default function SettingsPage() {
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                 </div>
+              )}
+              {saveError && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+                  {saveError}
+                </p>
               )}
             </div>
 
