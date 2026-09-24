@@ -87,7 +87,8 @@ export function Step5Results() {
       values.monthlyRent,
       values.vacancyRate,
       monthlyOperatingExpenses,
-      monthlyPayment
+      monthlyPayment,
+      values.otherMonthlyIncome || 0
     );
 
     // Investment metrics

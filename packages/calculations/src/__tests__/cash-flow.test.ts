@@ -286,3 +286,21 @@ describe('isPositiveCashFlow', () => {
     expect(isPositiveCashFlow(0)).toBe(false);
   });
 });
+
+describe('calculateCashFlow with other monthly income', () => {
+  it('adds other income to gross income without applying vacancy to it', () => {
+    // $3,200 rent, 5% vacancy, $1,125 expenses, $2,149.03 mortgage, $100 other income
+    const result = calculateCashFlow(3200, 5, 1125, 2149.03, 100);
+    expect(result.grossIncome).toBe(3300);
+    expect(result.vacancyLoss).toBe(160); // 5% of rent only
+    expect(result.netIncome).toBe(3140);
+    expect(result.cashFlow).toBeCloseTo(-134.03, 2);
+  });
+
+  it('defaults other income to zero', () => {
+    const withDefault = calculateCashFlow(3200, 5, 1125, 2149.03);
+    const explicitZero = calculateCashFlow(3200, 5, 1125, 2149.03, 0);
+    expect(withDefault).toEqual(explicitZero);
+    expect(withDefault.grossIncome).toBe(3200);
+  });
+});

@@ -38,7 +38,9 @@ export function SharedCalculationView({ calculation, expiresAt }: SharedCalculat
       calculation.insurance_annual / 12 +
       calculation.hoa_monthly +
       calculation.maintenance_monthly +
-      (calculation.monthly_rent * calculation.property_management_percent / 100) +
+      (calculation.property_management_mode === 'dollar'
+        ? (calculation.property_management_monthly ?? 0)
+        : (calculation.monthly_rent * calculation.property_management_percent / 100)) +
       calculation.utilities_monthly +
       calculation.other_expenses_monthly
 
@@ -46,7 +48,8 @@ export function SharedCalculationView({ calculation, expiresAt }: SharedCalculat
       calculation.monthly_rent,
       calculation.vacancy_rate,
       monthlyOperatingExpenses,
-      monthlyPayment
+      monthlyPayment,
+      calculation.other_monthly_income || 0
     )
 
     const downPayment = calculation.purchase_price * (calculation.down_payment_percent / 100)
@@ -80,6 +83,8 @@ export function SharedCalculationView({ calculation, expiresAt }: SharedCalculat
       hoaMonthly: calculation.hoa_monthly,
       maintenanceMonthly: calculation.maintenance_monthly,
       propertyManagementPercent: calculation.property_management_percent,
+      propertyManagementMode: (calculation.property_management_mode as 'percent' | 'dollar') || 'percent',
+      propertyManagementMonthly: calculation.property_management_monthly ?? 0,
       utilitiesMonthly: calculation.utilities_monthly,
       otherExpensesMonthly: calculation.other_expenses_monthly,
       annualExpenseIncrease: calculation.annual_expense_increase,
@@ -303,7 +308,7 @@ export function SharedCalculationView({ calculation, expiresAt }: SharedCalculat
                 <InputRow label="Insurance (Annual)" value={formatCurrency(calculation.insurance_annual)} />
                 <InputRow label="HOA (Monthly)" value={formatCurrency(calculation.hoa_monthly)} />
                 <InputRow label="Maintenance (Monthly)" value={formatCurrency(calculation.maintenance_monthly)} />
-                <InputRow label="Property Management" value={`${calculation.property_management_percent}%`} />
+                <InputRow label="Property Management" value={calculation.property_management_mode === 'dollar' ? `${formatCurrency(calculation.property_management_monthly ?? 0)}/mo` : `${calculation.property_management_percent}%`} />
                 <InputRow label="Utilities (Monthly)" value={formatCurrency(calculation.utilities_monthly)} />
               </div>
             </div>

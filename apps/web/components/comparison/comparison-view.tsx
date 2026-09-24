@@ -63,7 +63,7 @@ function computeProperty(prop: PropertyData): ComputedProperty {
     f.utilitiesMonthly +
     f.otherExpensesMonthly
 
-  const cashFlow = calculateCashFlow(f.monthlyRent, f.vacancyRate, monthlyOperatingExpenses, monthlyPayment)
+  const cashFlow = calculateCashFlow(f.monthlyRent, f.vacancyRate, monthlyOperatingExpenses, monthlyPayment, f.otherMonthlyIncome || 0)
 
   const downPayment = f.purchasePrice * (f.downPaymentPercent / 100)
   const totalInvestment = downPayment + f.closingCosts + f.repairCosts
@@ -240,7 +240,7 @@ export function ComparisonView({ properties, onBack }: ComparisonViewProps) {
         { label: 'Insurance', values: computed.map((p) => formatCurrency(p.formData.insuranceAnnual) + '/yr') },
         { label: 'HOA', values: computed.map((p) => formatCurrency(p.formData.hoaMonthly) + '/mo') },
         { label: 'Maintenance', values: computed.map((p) => formatCurrency(p.formData.maintenanceMonthly) + '/mo') },
-        { label: 'Mgmt Fee', values: computed.map((p) => `${p.formData.propertyManagementPercent}%`) },
+        { label: 'Mgmt Fee', values: computed.map((p) => p.formData.propertyManagementMode === 'dollar' ? formatCurrency(p.formData.propertyManagementMonthly || 0) + '/mo' : `${p.formData.propertyManagementPercent}%`) },
         { label: 'Utilities', values: computed.map((p) => formatCurrency(p.formData.utilitiesMonthly) + '/mo') },
       ],
     },
